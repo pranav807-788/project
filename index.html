@@ -111,23 +111,38 @@
     </div>
   </section>
 
-  <!-- SECTION 5 — Contact / The Vintage Lantern (lower-left) -->
+  <!-- SECTION 5 — Contact revealed through the door opening -->
   <section id="s5" class="section section--5">
-    <div class="section__inner section__inner--split">
-      <div class="contact-form">
-        <span class="eyebrow">Get in Touch</span>
-        <h2 class="display-sm">Step inside,<br/>when you are <em class="warm">ready.</em></h2>
-        <form autocomplete="off" onsubmit="return false;">
-          <input type="text" placeholder="Your Name" aria-label="Name" />
-          <input type="email" placeholder="Email Address" aria-label="Email" />
-          <textarea placeholder="Tell us about your dream kitchen..." rows="4" aria-label="Message"></textarea>
-          <button type="submit">Send Inquiry</button>
-        </form>
-      </div>
-      <div class="door-frame" aria-hidden="true">
+    <div class="section__inner section__inner--center">
+      <span class="eyebrow">Step Inside</span>
+      <h2 class="display-sm">The door opens<br/>when you are <em class="warm">ready.</em></h2>
+
+      <div class="door-frame door-frame--contact">
         <div class="door door--left"></div>
         <div class="door door--right"></div>
         <div class="door-light"></div>
+
+        <!-- Contact details hidden behind the doors — revealed as they open -->
+        <div class="door-contact" id="door-contact">
+          <h3 class="door-contact__title">Lumière Kitchen Atelier</h3>
+          <div class="door-contact__row">
+            <span class="door-contact__label">Atelier</span>
+            <span class="door-contact__value">14 Rue de la Lumière, Paris</span>
+          </div>
+          <div class="door-contact__row">
+            <span class="door-contact__label">Write</span>
+            <a class="door-contact__value" href="mailto:atelier@lumiere.studio">atelier@lumiere.studio</a>
+          </div>
+          <div class="door-contact__row">
+            <span class="door-contact__label">Call</span>
+            <a class="door-contact__value" href="tel:+33100000000">+33 1 00 00 00 00</a>
+          </div>
+          <div class="door-contact__row">
+            <span class="door-contact__label">Follow</span>
+            <span class="door-contact__value">@lumiere.atelier</span>
+          </div>
+          <p class="door-contact__cta">Walk in. We're listening.</p>
+        </div>
       </div>
     </div>
   </section>

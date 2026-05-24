@@ -249,53 +249,16 @@ body {
   color: var(--muted);
 }
 
-/* ── Contact form + door frame (Section 5) ──────────────────────────────── */
-.contact-form form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 32px;
-}
-.contact-form input,
-.contact-form textarea {
-  background: rgba(20, 18, 14, 0.6);
-  border: 1px solid rgba(251, 191, 36, 0.12);
-  border-radius: 2px;
-  padding: 14px 18px;
-  font-family: "Inter", sans-serif;
-  font-size: 14px;
-  color: var(--cream);
-  outline: none;
-  transition: border-color 300ms;
-}
-.contact-form input:focus,
-.contact-form textarea:focus {
-  border-color: var(--warm-med);
-}
-.contact-form button {
-  align-self: flex-start;
-  padding: 14px 36px;
-  background: transparent;
-  border: 1px solid var(--warm);
-  color: var(--warm);
-  font-family: "Inter", sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 400ms, color 400ms;
-}
-.contact-form button:hover {
-  background: var(--warm);
-  color: var(--ink);
-}
+/* ── (Contact form removed — details now live inside the door frame) ──── */
 
 
 /* ── Door frame (Section 5 decoration) ──────────────────────────────────── */
 .door-frame {
   position: relative;
   width: 100%;
-  height: 420px;
+  max-width: 480px;
+  height: 480px;
+  margin: 48px auto 0;
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -308,6 +271,7 @@ body {
   background: #0c0a08;
   border: 1px solid rgba(251, 191, 36, 0.06);
   transition: transform 800ms var(--ease-out);
+  z-index: 2;
 }
 .door--left  { transform-origin: left center; }
 .door--right { transform-origin: right center; }
@@ -321,6 +285,73 @@ body {
   opacity: 0.25;
   box-shadow: 0 0 30px 10px rgba(251, 191, 36, 0.3);
   transition: opacity 600ms, width 600ms;
+  z-index: 1;
+}
+
+/* ── Contact details inside the door frame ──────────────────────────────── */
+.door-contact {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  z-index: 0;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(251,191,36,0.06) 0%, transparent 70%);
+}
+.door-contact.is-revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+.door-contact__title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: 28px;
+  color: var(--warm);
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  margin-bottom: 32px;
+  letter-spacing: 0.02em;
+}
+.door-contact__row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 18px;
+  align-items: baseline;
+  text-align: left;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+}
+.door-contact__row:last-of-type { border-bottom: 0; }
+.door-contact__label {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--warm);
+  opacity: 0.8;
+}
+.door-contact__value {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 17px;
+  color: var(--cream);
+  text-decoration: none;
+  transition: color 280ms;
+}
+a.door-contact__value:hover { color: var(--warm); }
+.door-contact__cta {
+  margin-top: 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
