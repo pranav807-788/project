@@ -27,40 +27,6 @@
     <canvas id="scene" aria-hidden="true"></canvas>
 
     <!-- ============================================================== -->
-    <!--  CSS Overlay Lamp — morphs through 5 fixture states as         -->
-    <!--  the user scrolls. States are driven from main.js.             -->
-    <!--  The Three.js WebGL bulb is the real light source;             -->
-    <!--  this element provides the decorative fixture silhouette.      -->
-    <!-- ============================================================== -->
-    <div id="overlay-lamp" class="o-lamp o-lamp--ceiling" aria-hidden="true">
-      <div class="o-lamp__wire"></div>
-      <div class="o-lamp__fixture">
-        <!-- bracket arm (wall lamp) -->
-        <div class="o-lamp__bracket"></div>
-        <!-- shade (spotlight / table lamp) -->
-        <div class="o-lamp__shade"></div>
-        <!-- the bulb globe -->
-        <div class="o-lamp__globe">
-          <div class="o-lamp__filament"></div>
-        </div>
-        <!-- brass socket cap -->
-        <div class="o-lamp__socket"></div>
-        <!-- table lamp base / stem -->
-        <div class="o-lamp__base"></div>
-        <!-- lantern: hook + cage -->
-        <div class="o-lamp__hook"></div>
-        <div class="o-lamp__cage">
-          <div class="o-lamp__cage-bar"></div>
-          <div class="o-lamp__cage-bar"></div>
-          <div class="o-lamp__cage-bar"></div>
-          <div class="o-lamp__cage-bar"></div>
-        </div>
-      </div>
-      <!-- state label — fades in briefly on each transition -->
-      <div class="o-lamp__label" id="lamp-label"></div>
-    </div>
-
-    <!-- ============================================================== -->
     <!--  Overlay text + UI. Each chapter section fades by data-start /  -->
     <!--  data-end driven from main.js (scroll progress 0..1).           -->
     <!-- ============================================================== -->
@@ -87,43 +53,92 @@
         <p>Marble that holds a memory of warmth. Wood that listens. Light placed where it wants to be.</p>
       </section>
 
-      <!-- Chapter IV — What We Create -->
+      <!-- Chapter IV — Our Playground / Kitchen Cabinet Service Matrix -->
       <section class="chapter-services" data-start="0.46" data-end="0.61" aria-label="Services">
         <header class="chapter-head">
-          <span class="eyebrow">Chapter IV &middot; The Craft</span>
-          <h2 class="display-sm">What we <span class="warm">create.</span></h2>
+          <span class="eyebrow">Chapter IV &middot; Our Playground</span>
+          <h2 class="display-sm">Our <span class="warm">Services</span></h2>
+          <p class="chapter-subhead">Kitchen Cabinet · Digital Craft</p>
         </header>
-        <div class="services-grid">
-          <article class="service-card">
-            <span class="num">01</span>
-            <h3>Modular Kitchens</h3>
-            <p>Architectural cabinetry, calibrated to the room and the rhythm of the people in it.</p>
+
+        <!-- Cabinet Matrix — 3 vertical flush-door service cards -->
+        <div class="cabinet-grid">
+
+          <!-- CABINET 01 — SEO -->
+          <article class="cabinet-card" aria-label="SEO Services">
+            <div class="cabinet-card__top">
+              <span class="cabinet-label">CABINET 01</span>
+              <div class="cabinet-handle" aria-hidden="true">
+                <span class="cabinet-handle__bar"></span>
+              </div>
+            </div>
+            <div class="cabinet-card__body">
+              <h3 class="cabinet-title">SEO</h3>
+              <p class="cabinet-desc">
+                Structural web alignment engineered for long-term visibility. We configure search indexing at the architectural level — from metadata blueprints to crawl hierarchies — so every page earns its position.
+              </p>
+              <ul class="cabinet-services">
+                <li>Technical SEO Audits</li>
+                <li>Metadata Architecture</li>
+                <li>Core Web Vitals Optimisation</li>
+                <li>Search Indexing Configuration</li>
+                <li>Schema &amp; Structured Data</li>
+                <li>Crawl Efficiency Engineering</li>
+              </ul>
+            </div>
+            <div class="cabinet-card__glow" aria-hidden="true"></div>
           </article>
-          <article class="service-card">
-            <span class="num">02</span>
-            <h3>Smart Kitchens</h3>
-            <p>Intuitive technology &mdash; hidden, ambient, never in the way of cooking.</p>
+
+          <!-- CABINET 02 — SEM -->
+          <article class="cabinet-card" aria-label="SEM Services">
+            <div class="cabinet-card__top">
+              <span class="cabinet-label">CABINET 02</span>
+              <div class="cabinet-handle" aria-hidden="true">
+                <span class="cabinet-handle__bar"></span>
+              </div>
+            </div>
+            <div class="cabinet-card__body">
+              <h3 class="cabinet-title">SEM</h3>
+              <p class="cabinet-desc">
+                Paid acquisition strategies built on programmatic keyword auction targeting. We construct real-time traffic conversion loops that place your offer precisely where intent lives at the moment of decision.
+              </p>
+              <ul class="cabinet-services">
+                <li>Paid Search Strategy</li>
+                <li>Keyword Auction Targeting</li>
+                <li>Performance Max Campaigns</li>
+                <li>Conversion Rate Optimisation</li>
+                <li>Real-Time Bid Management</li>
+                <li>Attribution &amp; Analytics</li>
+              </ul>
+            </div>
+            <div class="cabinet-card__glow" aria-hidden="true"></div>
           </article>
-          <article class="service-card">
-            <span class="num">03</span>
-            <h3>Interior Design</h3>
-            <p>The kitchen as the centre of a home, dressed in materials that age beautifully.</p>
+
+          <!-- CABINET 03 — SMM -->
+          <article class="cabinet-card" aria-label="SMM Services">
+            <div class="cabinet-card__top">
+              <span class="cabinet-label">CABINET 03</span>
+              <div class="cabinet-handle" aria-hidden="true">
+                <span class="cabinet-handle__bar"></span>
+              </div>
+            </div>
+            <div class="cabinet-card__body">
+              <h3 class="cabinet-title">SMM</h3>
+              <p class="cabinet-desc">
+                Social growth pipelines tuned to audience network targeting. We build digital engagement footprints that compound — turning platforms into precision channels for brand authority and community depth.
+              </p>
+              <ul class="cabinet-services">
+                <li>Content Strategy &amp; Production</li>
+                <li>Audience Network Targeting</li>
+                <li>Community Growth Pipelines</li>
+                <li>Influencer Ecosystem</li>
+                <li>Social Commerce Integration</li>
+                <li>Engagement Footprint Analytics</li>
+              </ul>
+            </div>
+            <div class="cabinet-card__glow" aria-hidden="true"></div>
           </article>
-          <article class="service-card">
-            <span class="num">04</span>
-            <h3>Space Optimisation</h3>
-            <p>Volume understood as choreography. Every drawer earns its place.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">05</span>
-            <h3>Installation</h3>
-            <p>Site work performed like watch-making. Tolerances measured in tenths.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">06</span>
-            <h3>Custom Design</h3>
-            <p>One-of-one rooms drawn for a single household, never rendered twice.</p>
-          </article>
+
         </div>
       </section>
 

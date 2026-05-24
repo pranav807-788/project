@@ -915,7 +915,6 @@ function tick() {
   updateOverlay(s);
 
   // Expose smoothed scroll for the CSS overlay lamp to read each frame.
-  document.documentElement.dataset.lumiereScroll = s.toFixed(4);
 
   composer.render();
   requestAnimationFrame(tick);
@@ -929,101 +928,6 @@ state.bulb.vZ = -0.05;
 
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  CSS Overlay Lamp — 5 morphing fixture states tied to scroll progress.
-//
-//  The Three.js bulb handles all real lighting, shadows, physics, and bloom.
-//  This overlay element sits on top of the canvas as a pure CSS silhouette
-//  that visually "describes" what kind of fixture the light source is at
-//  each chapter of the narrative.
-//
-//  State map (scroll progress → fixture type → screen position):
-//   0.00–0.12  ceiling   top-left        (Chapter I — The Light)
-//   0.13–0.27  wall      middle-left     (Chapter II — The Threshold)
-//   0.30–0.43  spotlight top-center      (Chapter III — The Reveal)
-//   0.46–0.78  table     right-side      (Chapter IV/V — Craft & Projects)
-//   0.81–1.00  lantern   lower-left      (Chapter VI + Fin)
-// ─────────────────────────────────────────────────────────────────────────────
-
-(function initOverlayLamp() {
-  const el    = document.getElementById("overlay-lamp");
-  const label = document.getElementById("lamp-label");
-  if (!el) return;
-
-  const STATES = [
-    // [minScroll, maxScroll, className,   top,     left,   labelText]
-    [0.00, 0.12, "ceiling",   "6vh",  "12vw",  "Suspended Bulb"],
-    [0.13, 0.27, "wall",      "48vh", "2vw",   "Wall Lamp"],
-    [0.30, 0.43, "spotlight", "3vh",  "47vw",  "Spotlight"],
-    [0.46, 0.78, "table",     "36vh", "76vw",  "Table Lamp"],
-    [0.81, 1.00, "lantern",   "28vh", "8vw",   "Vintage Lantern"],
-  ];
-
-  const PREFIX = "o-lamp--";
-  let currentState = null;
-  let labelTimer = null;
-
-  function applyState(s, immediate = false) {
-    // Find which state range s falls into
-    let found = null;
-    for (const st of STATES) {
-      if (s >= st[0] && s <= st[1]) { found = st; break; }
-    }
-    // Outside any range — blend toward nearest
-    if (!found) {
-      // find the nearest by midpoint distance
-      let bestDist = Infinity;
-      for (const st of STATES) {
-        const mid = (st[0] + st[1]) / 2;
-        const d = Math.abs(s - mid);
-        if (d < bestDist) { bestDist = d; found = st; }
-      }
-    }
-    if (!found) return;
-
-    const [,, cls, top, left, labelText] = found;
-    if (cls === currentState) return;   // no change needed
-    currentState = cls;
-
-    // Swap state class
-    STATES.forEach(([,, c]) => el.classList.remove(PREFIX + c));
-    el.classList.add(PREFIX + cls);
-
-    // Move position (CSS transition handles the eased travel)
-    el.style.top  = top;
-    el.style.left = left;
-
-    // Show label briefly
-    if (label) {
-      label.textContent = labelText;
-      label.classList.add("is-visible");
-      clearTimeout(labelTimer);
-      labelTimer = setTimeout(() => label.classList.remove("is-visible"), 2200);
-    }
-  }
-
-  // ── Sync with the scroll state already being tracked in main.js ────────
-  // We hook into the existing RAF loop via a MutationObserver-free approach:
-  // read state.scroll every frame by overriding the updateOverlay function.
-  // (main.js calls updateOverlay(s) each frame with the smoothed scroll)
-
-  const _origUpdateOverlay = window.__lumiere_updateOverlay;
-
-  // Patch: main.js exposes state.scroll on the window so we can read it.
-  // We use requestAnimationFrame to poll independently — safe and simple.
-  function pollScroll() {
-    // state is defined in main.js's module scope; we read it via the canvas
-    // frame counter trick: main.js writes the smoothed scroll to a data attr.
-    const s = parseFloat(document.documentElement.dataset.lumiereScroll || "0");
-    applyState(s);
-    requestAnimationFrame(pollScroll);
-  }
-
-  // main.js needs to write the scroll value somewhere we can read.
-  // We patch this by appending a tiny one-liner that writes to the dataset
-  // at the end of each frame — see the patch below.
-  requestAnimationFrame(pollScroll);
-})();
 
 
 
