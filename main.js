@@ -163,21 +163,25 @@
     });
   }
 
-  // ── Section 5 door animation: doors slide open to reveal contact ─────
-  const doorLeft  = document.querySelector(".door--left");
-  const doorRight = document.querySelector(".door--right");
-  const doorLight = document.querySelector(".door-light");
+  // ── Section 5 door animation: 3D hinged doors open to reveal contact ───
+  const doorLeft  = document.getElementById("door-left");
+  const doorRight = document.getElementById("door-right");
+  const doorLight = document.getElementById("door-light");
   const doorContact = document.getElementById("door-contact");
 
   if (doorLeft && doorRight) {
+    // Set initial state explicitly so GSAP knows the starting point
+    gsap.set(doorLeft, { rotateY: 0 });
+    gsap.set(doorRight, { rotateY: 0 });
+
     gsap.timeline({
       scrollTrigger: {
         trigger: "#s5",
-        start: "top 80%",
+        start: "top 70%",
         end: "center center",
         scrub: 1.5,
         onUpdate: (self) => {
-          // Reveal contact details once doors are ~30% open
+          // Reveal contact once doors are ~30% open
           if (self.progress > 0.3 && doorContact) {
             doorContact.classList.add("is-revealed");
           } else if (doorContact) {
@@ -186,10 +190,12 @@
         }
       }
     })
-    // Slide left door to the left, right door to the right
-    .to(doorLeft,  { xPercent: -100, ease: "power2.out" }, 0)
-    .to(doorRight, { xPercent: 100,  ease: "power2.out" }, 0)
-    .to(doorLight, { opacity: 0, width: 0, ease: "power2.out" }, 0);
+    // Left door swings outward (negative Y = opens toward viewer on left hinge)
+    .to(doorLeft, { rotateY: -75, ease: "power2.out" }, 0)
+    // Right door swings outward (positive Y = opens toward viewer on right hinge)
+    .to(doorRight, { rotateY: 75, ease: "power2.out" }, 0)
+    // Light seam fades as gap opens
+    .to(doorLight, { opacity: 0, ease: "power1.out" }, 0.2);
   }
 
   // ── Ambient: auto-ignite the lamp if user scrolls past section 1 ───────

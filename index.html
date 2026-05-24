@@ -117,12 +117,23 @@
       <span class="eyebrow">Step Inside</span>
       <h2 class="display-sm">The door opens<br/>when you are <em class="warm">ready.</em></h2>
 
-      <div class="door-frame door-frame--contact">
-        <div class="door door--left"></div>
-        <div class="door door--right"></div>
-        <div class="door-light"></div>
-
-        <!-- Contact details hidden behind the doors — revealed as they open -->
+      <!-- Door frame with proper 3D perspective wrapper per door -->
+      <div class="door-frame">
+        <!-- Left door wrapper — perspective applied here -->
+        <div class="door-wrapper door-wrapper--left">
+          <div class="door door--left" id="door-left">
+            <div class="door__handle"></div>
+          </div>
+        </div>
+        <!-- Right door wrapper — perspective applied here -->
+        <div class="door-wrapper door-wrapper--right">
+          <div class="door door--right" id="door-right">
+            <div class="door__handle"></div>
+          </div>
+        </div>
+        <!-- Light seam between the doors -->
+        <div class="door-light" id="door-light"></div>
+        <!-- Contact details behind the doors -->
         <div class="door-contact" id="door-contact">
           <h3 class="door-contact__title">Lumière Kitchen Atelier</h3>
           <div class="door-contact__row">
