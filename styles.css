@@ -1,708 +1,1024 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   Lumière — Morphing Lamp Kitchen Atelier
-   CSS-driven lamp states + GSAP-powered scroll transitions
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ───────────────────────────────────────────────────────────────────────────
+   Lumière — Kitchen Atelier
+   Cinematic UI layer over the WebGL stage
+   ─────────────────────────────────────────────────────────────────────────── */
 
 :root {
   color-scheme: dark;
-  --warm:       #fbbf24;
-  --warm-dim:   rgba(251, 191, 36, 0.15);
-  --warm-med:   rgba(251, 191, 36, 0.4);
-  --warm-full:  rgba(251, 191, 36, 0.85);
-  --cream:      #f4e7d0;
-  --muted:      #8a7e6c;
-  --ink:        #0a0a0a;
-  --charcoal:   #1a1816;
-  --glass-off:  #1e1c1a;
-  --glass-on:   #ffeeb8;
-  --ease-out:   cubic-bezier(.20,.80,.20,1);
+
+  /* Palette — black room, warm gold, soft cream */
+  --warm-1:    #ffb070;       /* primary glow */
+  --warm-2:    #c8a070;       /* gold accent  */
+  --warm-3:    #d6b483;       /* brushed brass */
+  --cream:     #f4e7d0;
+  --muted:     #b8a890;
+  --muted-2:   #7a6e5c;
+  --ink:       #0a0908;
+  --ink-2:     #050403;
+
+  /* Easings */
+  --ease-out:  cubic-bezier(.20, .80, .20, 1);
+  --ease-cine: cubic-bezier(.65, .05, .36, 1);
+
+  /* Type scale (clamps to viewport) */
+  --t-display:    clamp(54px, 11vw, 168px);
+  --t-display-sm: clamp(40px, 7vw, 104px);
+  --t-eyebrow:    11px;
+  --t-body:       14px;
+  --t-meta:       10px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html {
-  scroll-behavior: auto;
-  background: var(--ink);
-}
+html { scroll-behavior: auto; } /* we drive easing in JS, never CSS-jump */
 
-body {
-  background: var(--ink);
+html, body {
+  background: #000;
   color: var(--cream);
-  font-family: "Cormorant Garamond", serif;
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
 }
 
+/* Tall body provides the scroll runway. The 3D stage is fixed. */
+body { min-height: 1000vh; }
 
-/* ── Typography ─────────────────────────────────────────────────────────── */
-.display {
-  font-weight: 300;
-  font-size: clamp(52px, 10vw, 148px);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-}
-.display-sm {
-  font-weight: 300;
-  font-size: clamp(38px, 6vw, 88px);
-  line-height: 0.98;
-  letter-spacing: -0.015em;
-}
-.warm {
-  color: var(--warm);
-  font-style: italic;
-  text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
-}
-.eyebrow {
-  display: block;
-  font-family: "Inter", sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--warm);
-  opacity: 0.8;
-  margin-bottom: 28px;
-}
-.body-text {
-  font-family: "Inter", sans-serif;
-  font-size: 15px;
-  font-weight: 300;
-  line-height: 1.75;
-  color: var(--muted);
-  max-width: 480px;
-  margin-top: 24px;
-}
-.hint {
-  font-family: "Inter", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 48px;
-}
-
-
-/* ── Sections ───────────────────────────────────────────────────────────── */
-.section {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 10vh 8vw;
+#app {
+  position: fixed;
+  inset: 0;
   overflow: hidden;
 }
 
-.section__inner { max-width: 680px; }
-.section__inner--right { margin-left: auto; text-align: left; }
-.section__inner--center { margin: 0 auto; text-align: center; max-width: 1100px; }
-.section__inner--split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8vw;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  align-items: center;
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
 }
 
-/* ── Brand reveal (Section 1) ───────────────────────────────────────────── */
-.brand-reveal {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin-bottom: 48px;
+/* ───────────────────────────────────────────────────────────────────────────
+   Overlay container — every chapter section sits inside this.
+   Sections fade in/out based on data-start / data-end attributes,
+   driven from main.js using scroll progress.
+   ─────────────────────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.overlay > section {
+  position: absolute;
+  inset: 0;
   opacity: 0;
-  transform: scale(0.7);
-  transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out);
-}
-.brand-reveal.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-.brand-mark {
-  font-size: 36px;
-  font-weight: 300;
-  color: var(--warm);
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
-}
-.brand-name { font-size: 22px; font-weight: 400; }
-.brand-tag {
-  font-family: "Inter", sans-serif;
-  font-size: 9px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-left: 1px solid var(--warm-dim);
-  padding-left: 14px;
+  transform: translateY(28px);
+  will-change: opacity, transform;
+  transition: opacity 360ms var(--ease-out);
+  /* JS sets opacity / transform inline; this transition only handles
+     fallback transitions before the first frame paints. */
 }
 
-
-/* ── Stats (Section 2) ──────────────────────────────────────────────────── */
-.stats {
-  list-style: none;
-  display: flex;
-  gap: 48px;
-  margin-top: 40px;
-}
-.stats li {
+/* ── Generic centered chapter text (chapters 1, 2, 3, 6) ───────────────── */
+.scene-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 8vw;
 }
-.stats strong {
+
+.eyebrow {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: var(--t-eyebrow);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--warm-2);
+  opacity: 0.85;
+  margin-bottom: 32px;
+}
+
+.display, .display-sm {
   font-family: "Cormorant Garamond", serif;
-  font-size: 40px;
   font-weight: 300;
-  color: var(--warm);
-  text-shadow: 0 0 18px rgba(251, 191, 36, 0.4);
+  line-height: 0.96;
+  letter-spacing: -0.014em;
+  color: var(--cream);
+  text-shadow: 0 0 48px rgba(255, 178, 102, 0.16);
 }
-.stats span {
+
+.display    { font-size: var(--t-display); }
+.display-sm { font-size: var(--t-display-sm); line-height: 1.0; }
+
+/* `.warm` — italicised gold span used inside display headings */
+.display .warm,
+.display-sm .warm {
+  color: var(--warm-1);
+  font-style: italic;
+  font-weight: 300;
+  text-shadow:
+    0 0 36px rgba(255, 176, 112, 0.55),
+    0 0 12px rgba(255, 176, 112, 0.4);
+}
+
+.scene-text p,
+.chapter-services p,
+.chapter-projects p {
+  font-family: "Inter", sans-serif;
+  font-weight: 300;
+  font-size: var(--t-body);
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-top: 28px;
+  max-width: 480px;
+}
+
+.hint {
+  margin-top: 64px;
+  font-size: var(--t-meta);
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Chapter IV — Services
+   Cards appear inside a soft circular "light projection" mask so the
+   services literally look as though they emerge under the bulb.
+   ─────────────────────────────────────────────────────────────────────────── */
+.chapter-services {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12vh 8vw 8vh;
+}
+
+.chapter-head {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  width: 100%;
+  max-width: 1180px;
+  pointer-events: auto;     /* re-enable hover/click inside the cards    */
+
+  /* Soft circular mask — cards fade where the "light" doesn't reach.    */
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 45%,
+                                       #000 35%, transparent 95%);
+          mask-image: radial-gradient(ellipse 70% 80% at 50% 45%,
+                                       #000 35%, transparent 95%);
+}
+
+.service-card {
+  position: relative;
+  padding: 40px 32px 36px;
+  background: linear-gradient(180deg,
+              rgba(20, 16, 12, 0.55), rgba(8, 6, 6, 0.55));
+  border: 1px solid rgba(200, 160, 112, 0.12);
+  border-radius: 2px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transform: translateY(0);
+  transition:
+    transform 600ms var(--ease-cine),
+    border-color 600ms var(--ease-cine),
+    box-shadow 600ms var(--ease-cine),
+    background 600ms var(--ease-cine);
+  overflow: hidden;
+}
+
+/* Subtle gold corner mark — quiet luxury detail */
+.service-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 16px; height: 16px;
+  border-top: 1px solid var(--warm-2);
+  border-left: 1px solid var(--warm-2);
+  opacity: 0.5;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.service-card .num {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--warm-2);
+  margin-bottom: 26px;
+}
+
+.service-card h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+  color: var(--cream);
+  margin-bottom: 14px;
+}
+
+.service-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200, 160, 112, 0.42);
+  background: linear-gradient(180deg,
+              rgba(28, 22, 16, 0.7), rgba(12, 10, 8, 0.7));
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 176, 112, 0.08),
+    0 0 80px rgba(255, 176, 112, 0.12);
+}
+
+.service-card:hover::before { opacity: 1; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Chapter V — Featured Projects
+   Horizontal rail driven by scroll. main.js translates `.projects-rail`
+   on the X axis based on scroll progress within this chapter.
+   ─────────────────────────────────────────────────────────────────────────── */
+.chapter-projects {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 10vh 0 8vh;
+  pointer-events: auto;
+}
+
+.chapter-projects .chapter-head {
+  text-align: left;
+  padding: 0 8vw;
+  margin-bottom: 64px;
+}
+
+.projects-rail-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* Soft fade at the rail edges so cards seem to emerge from darkness */
+  -webkit-mask-image: linear-gradient(90deg,
+                       transparent 0, #000 8%, #000 92%, transparent 100%);
+          mask-image: linear-gradient(90deg,
+                       transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.projects-rail {
+  display: flex;
+  gap: 5vw;
+  padding: 0 8vw;
+  will-change: transform;
+}
+
+.project {
+  flex: 0 0 auto;
+  width: 60vw;
+  max-width: 880px;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 24px;
+}
+
+.project-art {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #0a0807;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(200, 160, 112, 0.08);
+  transform: scale(0.97);
+  transition: transform 1100ms var(--ease-cine);
+}
+.project-art svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.project:hover .project-art { transform: scale(1.0); }
+
+.project-meta {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: baseline;
+  padding: 0 4px;
+}
+.project-meta .num {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  color: var(--warm-2);
+}
+.project-meta h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.05;
+  color: var(--cream);
+  letter-spacing: -0.005em;
+}
+.project-meta .loc {
   font-family: "Inter", sans-serif;
   font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--muted);
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
 }
-
-/* ── Services grid (Section 3) ──────────────────────────────────────────── */
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 48px;
-}
-.card {
-  padding: 36px 28px;
-  background: rgba(20, 18, 14, 0.6);
-  border: 1px solid rgba(251, 191, 36, 0.08);
-  border-radius: 3px;
-  text-align: left;
-  transition: transform 500ms var(--ease-out), box-shadow 500ms var(--ease-out),
-              border-color 500ms var(--ease-out);
-}
-.card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(251, 191, 36, 0.35);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 60px rgba(251, 191, 36, 0.12);
-}
-.card__num {
-  font-family: "Inter", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.4em;
-  color: var(--warm);
-  margin-bottom: 18px;
-  display: block;
-}
-.card h3 {
-  font-weight: 400;
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-.card p {
+.project-meta .desc {
+  grid-column: 2 / -1;
   font-family: "Inter", sans-serif;
   font-size: 13px;
   line-height: 1.65;
   color: var(--muted);
+  margin: 8px 0 0;
+  max-width: 520px;
 }
 
-
-/* ── Portfolio track (Section 4) ────────────────────────────────────────── */
-.portfolio-track {
-  width: 100%;
-  overflow: hidden;
-  margin-top: 48px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
-          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
-}
-.portfolio-track__rail {
-  display: flex;
-  gap: 3vw;
-  will-change: transform;
-}
-.project-card {
-  flex: 0 0 300px;
-  text-align: left;
-}
-.project-card__img {
-  width: 100%;
-  aspect-ratio: 4/3;
-  border-radius: 3px;
-  margin-bottom: 16px;
-  background: var(--charcoal);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  transition: box-shadow 600ms var(--ease-out);
-}
-.project-card__img--1 { background: linear-gradient(135deg, #1a120a, #0a0a0a); }
-.project-card__img--2 { background: linear-gradient(135deg, #0a0a0c, #16110d); }
-.project-card__img--3 { background: linear-gradient(135deg, #0d0a08, #050403); }
-.project-card__img--4 { background: linear-gradient(135deg, #14100a, #080604); }
-.project-card h3 {
-  font-weight: 400;
-  font-size: 22px;
-  margin-bottom: 4px;
-}
-.project-card p {
-  font-family: "Inter", sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* ── (Contact form removed — details now live inside the door frame) ──── */
-
-
-/* ── Door frame (Section 5) — proper 3D hinged double door ───────────────── */
-.door-frame {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  height: 520px;
-  margin: 48px auto 0;
-  border: 3px solid #1a1614;
-  border-radius: 2px;
-  background: #030302;
-}
-
-/* Each door lives inside its own wrapper that provides perspective.
-   This is the KEY — perspective must be on the IMMEDIATE parent of the
-   rotating element for rotateY to produce visible 3D depth. */
-.door-wrapper {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  perspective: 800px;
-  overflow: visible;
-  z-index: 2;
-}
-.door-wrapper--left  { left: 0; }
-.door-wrapper--right { right: 0; }
-
-.door {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(135deg, #0e0c0a 0%, #080706 100%);
-  border: 1px solid rgba(251, 191, 36, 0.05);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  /* Brass edge trim on the inner side */
-  box-shadow: inset -1px 0 0 rgba(251, 191, 36, 0.1);
-}
-.door--left {
-  transform-origin: left center;
-  left: 0;
-  border-right: 1px solid rgba(251, 191, 36, 0.08);
-}
-.door--right {
-  transform-origin: right center;
-  right: 0;
-  left: auto;
-  border-left: 1px solid rgba(251, 191, 36, 0.08);
-  box-shadow: inset 1px 0 0 rgba(251, 191, 36, 0.1);
-}
-
-/* Door handles */
-.door__handle {
-  position: absolute;
-  top: 50%;
-  width: 6px;
-  height: 40px;
-  background: linear-gradient(180deg, #c8a060, #a08040);
-  border-radius: 3px;
-  transform: translateY(-50%);
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
-}
-.door--left .door__handle { right: 16px; }
-.door--right .door__handle { left: 16px; }
-
-/* Light seam between closed doors */
-.door-light {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 3px;
-  transform: translateX(-50%);
-  background: var(--warm);
-  opacity: 0.4;
-  box-shadow: 0 0 20px 8px rgba(251, 191, 36, 0.3),
-              0 0 60px 20px rgba(251, 191, 36, 0.15);
-  z-index: 3;
-}
-
-/* Contact details behind the doors */
-.door-contact {
-  position: absolute;
-  inset: 0;
+/* ───────────────────────────────────────────────────────────────────────────
+   Final ending — Contact card framed by the open door
+   The card sits center-screen so it visually appears inside the doorway.
+   ─────────────────────────────────────────────────────────────────────────── */
+.chapter-ending {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 28px;
-  z-index: 1;
-  opacity: 0;
-  transform: scale(0.92);
-  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
   text-align: center;
-  background: radial-gradient(ellipse at center, rgba(251,191,36,0.08) 0%, rgba(5,4,3,0.95) 70%);
+  padding: 0 8vw;
 }
-.door-contact.is-revealed {
-  opacity: 1;
-  transform: scale(1);
+
+.contact-card {
+  margin-top: 56px;
+  padding: 40px 48px;
+  width: min(540px, 86vw);
+  background: linear-gradient(180deg,
+              rgba(20, 16, 12, 0.55), rgba(8, 6, 6, 0.4));
+  border: 1px solid rgba(200, 160, 112, 0.18);
+  border-radius: 2px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 90px rgba(255, 176, 112, 0.16),
+    0 30px 80px rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
 }
-.door-contact__title {
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 300;
-  font-size: 28px;
-  color: var(--warm);
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
-  margin-bottom: 32px;
-  letter-spacing: 0.02em;
-}
-.door-contact__row {
+
+.contact-row {
   display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 18px;
+  grid-template-columns: 90px 1fr;
   align-items: baseline;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(200, 160, 112, 0.08);
   text-align: left;
-  width: 100%;
-  max-width: 320px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(251, 191, 36, 0.08);
 }
-.door-contact__row:last-of-type { border-bottom: 0; }
-.door-contact__label {
+.contact-row:last-child { border-bottom: 0; }
+
+.contact-label {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.36em;
   text-transform: uppercase;
-  color: var(--warm);
-  opacity: 0.8;
+  color: var(--warm-2);
 }
-.door-contact__value {
+.contact-value {
   font-family: "Cormorant Garamond", serif;
-  font-size: 17px;
+  font-size: 18px;
+  letter-spacing: 0.02em;
   color: var(--cream);
   text-decoration: none;
-  transition: color 280ms;
+  transition: color 280ms var(--ease-out);
 }
-a.door-contact__value:hover { color: var(--warm); }
-.door-contact__cta {
-  margin-top: 28px;
-  font-family: "Inter", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--muted);
+a.contact-value:hover { color: var(--warm-1); }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Static cinematic chrome
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Vignette — keeps focus toward the center */
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 28%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.94) 100%);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE LAMP — All 5 visual states defined here.
-   GSAP toggles classes (.lamp--ceiling, .lamp--wall, etc.) AND animates
-   position, wire-height, and rotation via inline styles.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.lamp {
+/* Film grain (SVG noise blended over scene) */
+.grain {
   position: fixed;
-  z-index: 100;
+  inset: 0;
   pointer-events: none;
-  /* Starting position (top-left for Section 1) */
-  top: 8vh;
-  left: 12vw;
+  z-index: 6;
+  opacity: 0.085;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0 0.7  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  animation: grain-drift 1.6s steps(4) infinite;
+}
+@keyframes grain-drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-6px, 4px); }
+  50%  { transform: translate(4px, -6px); }
+  75%  { transform: translate(-3px, -3px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Brand bar — minimal top-of-screen monogram */
+.brand-bar {
+  position: fixed;
+  top: 28px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 7;
+  pointer-events: none;
+  font-family: "Inter", sans-serif;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+  pointer-events: auto;
+}
+.brand-mark {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: 26px;
+  color: var(--warm-1);
+  text-shadow: 0 0 18px rgba(255, 176, 112, 0.55);
+  line-height: 1;
+}
+.brand-name {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+}
+.brand-tag {
+  font-size: 9px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  border-left: 1px solid rgba(200, 160, 112, 0.25);
+  padding-left: 14px;
+  margin-left: 4px;
+}
+.brand-meta {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.brand-meta-item {
+  font-size: 9px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+/* Vertical chapter indicator — small dots on the right edge */
+.chapter-nav {
+  position: fixed;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 7;
+  pointer-events: none;
+  font-family: "Inter", sans-serif;
+}
+.chapter-nav ol {
+  list-style: none;
   display: flex;
   flex-direction: column;
+  gap: 22px;
+}
+.chapter-nav li {
+  display: flex;
   align-items: center;
-  will-change: transform, top, left;
+  gap: 14px;
+  cursor: default;
+  opacity: 0.55;
+  transition: opacity 600ms var(--ease-out);
+}
+.chapter-nav .dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--muted-2);
+  transition:
+    background 600ms var(--ease-out),
+    box-shadow 600ms var(--ease-out),
+    transform 600ms var(--ease-out);
+}
+.chapter-nav .label {
+  font-size: 9px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 600ms var(--ease-out),
+    color 600ms var(--ease-out),
+    transform 600ms var(--ease-out);
+}
+.chapter-nav li.is-active {
+  opacity: 1;
+}
+.chapter-nav li.is-active .dot {
+  background: var(--warm-1);
+  box-shadow: 0 0 14px rgba(255, 176, 112, 0.7);
+  transform: scale(1.6);
+}
+.chapter-nav li.is-active .label {
+  opacity: 1;
+  color: var(--cream);
+  transform: translateX(0);
 }
 
-.lamp__wire {
-  width: 2px;
-  height: 120px;
-  background: linear-gradient(to bottom, #1a1816, #2a2622);
-  transform-origin: top center;
-  transition: height 1.2s var(--ease-out);
+/* Scroll indicator — vertical hairline near the bottom */
+.scroll-indicator {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 56px;
+  z-index: 8;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 600ms var(--ease-out);
+}
+.scroll-indicator span {
+  display: block;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--warm-1), transparent);
+  animation: scrollPulse 2.6s var(--ease-cine) infinite;
+}
+@keyframes scrollPulse {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  40%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
 
-
-.lamp__fixture {
-  position: relative;
-  width: 60px;
-  height: 60px;
+.noscript {
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  pointer-events: auto;
+  background: #000;
+  color: var(--warm-2);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
-/* Bulb — the glowing orb (visible in most states) */
-.lamp__bulb {
-  width: 36px;
-  height: 44px;
-  border-radius: 50% 50% 45% 45%;
-  background: var(--glass-off);
+/* ───────────────────────────────────────────────────────────────────────────
+   Responsive
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .project { width: 78vw; }
+}
+
+@media (max-width: 720px) {
+  .brand-bar { top: 18px; left: 18px; right: 18px; }
+  .brand-tag { display: none; }
+  .brand-meta-item:not(:last-child) { display: none; }
+
+  .chapter-nav { right: 16px; }
+  .chapter-nav .label { display: none; }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .service-card { padding: 30px 24px; }
+
+  .project { width: 84vw; }
+  .project-meta {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .project-meta .loc { text-align: left; }
+
+  .contact-card { padding: 28px 24px; }
+  .contact-row { grid-template-columns: 70px 1fr; gap: 14px; }
+  .contact-value { font-size: 15px; }
+
+  .scene-text p { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .scroll-indicator span { animation: none; }
+  .service-card,
+  .project-art,
+  .chapter-nav li,
+  .chapter-nav .dot,
+  .chapter-nav .label { transition: none; }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CSS Overlay Lamp — 5 morphing fixture states
+   Sits on top of the WebGL canvas as a decorative silhouette.
+   The actual light / physics / glow come from Three.js; this layer
+   provides the recognisable fixture shape that changes with scroll.
+
+   States (driven by main.js adding classes to #overlay-lamp):
+     .o-lamp--ceiling   Hanging glass bulb (default, Ch I)
+     .o-lamp--wall      Wall-mounted bracket lamp (Ch II)
+     .o-lamp--spotlight Hanging industrial spotlight (Ch III)
+     .o-lamp--table     Desktop table lamp (Ch IV)
+     .o-lamp--lantern   Vintage lantern on an iron hook (Ch V–Fin)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Base shell ─────────────────────────────────────────────────────────── */
+.o-lamp {
+  position: fixed;
+  z-index: 12;          /* above vignette (5) and grain (6), below nothing */
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* default position: top-left, matching Ch I camera view */
+  top: 6vh;
+  left: 12vw;
+  will-change: top, left, transform;
+  /* all position/size transitions happen through JS-driven CSS vars
+     so we only need a gentle fallback for the shape morphs */
+  transition: top 1.4s cubic-bezier(.65,.05,.36,1),
+              left 1.4s cubic-bezier(.65,.05,.36,1);
+}
+
+/* ── Wire ───────────────────────────────────────────────────────────────── */
+.o-lamp__wire {
+  width: 2px;
+  background: linear-gradient(to bottom, #1a1614 0%, #2a2218 100%);
+  height: 80px;
+  transform-origin: top center;
+  transition: height 1.2s cubic-bezier(.65,.05,.36,1),
+              opacity 800ms ease;
+  border-radius: 1px;
+}
+
+/* ── Fixture container ──────────────────────────────────────────────────── */
+.o-lamp__fixture {
   position: relative;
-  transition: background 600ms, box-shadow 600ms, filter 600ms;
-}
-.lamp__filament {
-  position: absolute;
-  inset: 30% 35%;
-  border: 1px solid rgba(251, 191, 36, 0.25);
-  border-radius: 50%;
-  transition: border-color 600ms, box-shadow 600ms;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Active / "on" state applied via .lamp--on */
-.lamp--on .lamp__bulb {
-  background: var(--glass-on);
+/* ── Globe (the bulb) ───────────────────────────────────────────────────── */
+.o-lamp__globe {
+  position: relative;
+  width: 32px;
+  height: 38px;
+  border-radius: 50% 50% 44% 44%;
+  background: radial-gradient(ellipse at 38% 32%,
+    rgba(255, 232, 180, 0.18) 0%,
+    rgba(26, 22, 16, 0.85) 65%,
+    rgba(10, 8, 6, 0.95) 100%);
+  border: 1px solid rgba(200, 160, 112, 0.25);
   box-shadow:
-    0 0 50px 15px rgba(251, 191, 36, 0.6),
-    0 0 120px 30px rgba(251, 191, 36, 0.3),
-    0 0 200px 60px rgba(251, 191, 36, 0.12);
-  filter: brightness(1.3);
-}
-.lamp--on .lamp__filament {
-  border-color: var(--warm);
-  box-shadow: 0 0 8px 2px var(--warm);
-}
-
-/* Shade (used by wall lamp + table lamp) */
-.lamp__shade {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  transition: all 800ms var(--ease-out);
+    inset 0 -3px 8px rgba(0,0,0,0.6),
+    0 0 18px 2px rgba(255, 176, 80, 0.08);
+  transition: width 900ms cubic-bezier(.65,.05,.36,1),
+              height 900ms cubic-bezier(.65,.05,.36,1),
+              border-radius 900ms cubic-bezier(.65,.05,.36,1),
+              box-shadow 900ms ease;
+  z-index: 2;
 }
 
-/* Bracket (wall lamp horizontal arm) */
-.lamp__bracket {
+/* Filament wire visible inside the globe */
+.o-lamp__filament {
   position: absolute;
-  width: 0;
-  height: 4px;
-  background: #2a2622;
+  inset: 32% 28%;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 50%;
+  transition: border-color 600ms ease, box-shadow 600ms ease;
+}
+
+/* ── Socket cap (brass top on the bulb) ──────────────────────────────────── */
+.o-lamp__socket {
+  position: absolute;
+  top: -6px;
   left: 50%;
-  top: 50%;
-  transform: translate(-100%, -50%);
-  opacity: 0;
-  transition: all 800ms var(--ease-out);
+  transform: translateX(-50%);
+  width: 18px;
+  height: 10px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #1a1310, #0e0c09);
+  border: 1px solid rgba(200, 160, 112, 0.3);
+  z-index: 3;
+  transition: width 900ms cubic-bezier(.65,.05,.36,1);
 }
 
-/* Base (table lamp stand) */
-.lamp__base {
+/* ── Bracket arm (wall lamp) ─────────────────────────────────────────────── */
+.o-lamp__bracket {
   position: absolute;
-  bottom: -20px;
+  height: 4px;
   width: 0;
-  height: 0;
-  background: #1a1816;
+  background: linear-gradient(90deg, #1a1614, #2a2218);
   border-radius: 2px;
+  top: 50%;
+  right: 50%;
+  transform: translateY(-50%);
+  transform-origin: right center;
   opacity: 0;
-  transition: all 800ms var(--ease-out);
+  transition: width 900ms cubic-bezier(.65,.05,.36,1),
+              opacity 600ms ease;
 }
 
-/* Hook (lantern) */
-.lamp__hook {
+/* ── Shade (cone) ────────────────────────────────────────────────────────── */
+.o-lamp__shade {
   position: absolute;
-  top: -16px;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 0;
   height: 0;
-  border: 2px solid #2a2622;
+  opacity: 0;
+  /* shape built with CSS border trick — overridden per state */
+  transition: all 900ms cubic-bezier(.65,.05,.36,1);
+}
+
+/* ── Table lamp base ─────────────────────────────────────────────────────── */
+.o-lamp__base {
+  position: absolute;
+  bottom: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  background: linear-gradient(180deg, #1a1614, #0e0c09);
+  border-radius: 2px;
+  transition: all 900ms cubic-bezier(.65,.05,.36,1);
+}
+
+/* ── Lantern hook ────────────────────────────────────────────────────────── */
+.o-lamp__hook {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 2px solid #2a2218;
   border-radius: 50% 50% 0 0;
   border-bottom: none;
   opacity: 0;
-  transition: all 800ms var(--ease-out);
+  transition: all 900ms cubic-bezier(.65,.05,.36,1);
 }
 
-/* Lantern cage (lantern) */
-.lamp__lantern-cage {
+/* ── Lantern cage ────────────────────────────────────────────────────────── */
+.o-lamp__cage {
   position: absolute;
-  inset: -8px;
-  border: 2px solid transparent;
+  inset: -10px;
+  border: 1.5px solid transparent;
   border-radius: 4px;
   opacity: 0;
-  transition: all 800ms var(--ease-out);
+  transition: all 900ms cubic-bezier(.65,.05,.36,1);
 }
-
-
-/* ── Glow: radial ambient behind the fixture ────────────────────────────── */
-.lamp__glow {
+/* Vertical bars inside the cage */
+.o-lamp__cage-bar {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px;
-  height: 200px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(251,191,36,0.0) 0%, transparent 70%);
+  top: 0; bottom: 0;
+  width: 1.5px;
+  background: rgba(200, 160, 112, 0.35);
+  border-radius: 1px;
+}
+.o-lamp__cage-bar:nth-child(1) { left: 20%; }
+.o-lamp__cage-bar:nth-child(2) { left: 40%; }
+.o-lamp__cage-bar:nth-child(3) { left: 60%; }
+.o-lamp__cage-bar:nth-child(4) { left: 80%; }
+
+/* ── State label (briefly visible on transition) ────────────────────────── */
+.o-lamp__label {
+  margin-top: 14px;
+  font-family: "Inter", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(200, 160, 112, 0.6);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 600ms ease, transform 600ms ease;
   pointer-events: none;
-  transition: background 800ms, width 800ms, height 800ms;
 }
-.lamp--on .lamp__glow {
-  background: radial-gradient(circle, rgba(251,191,36,0.35) 0%, rgba(251,191,36,0.08) 40%, transparent 70%);
-  width: 320px;
-  height: 320px;
+.o-lamp__label.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* ── Cone of light projected beneath / beside the lamp ──────────────────── */
-.lamp__cone {
-  position: absolute;
-  top: 100%;
-  left: 50%;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE 1 — Ceiling Bulb  (Chapter I: top-left, scroll 0–0.12)
+   Standard hanging glass bulb. Wire is long, globe is full size.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.o-lamp--ceiling .o-lamp__wire    { height: 80px; opacity: 1; }
+.o-lamp--ceiling .o-lamp__globe   { width: 32px; height: 38px; }
+.o-lamp--ceiling .o-lamp__socket  { width: 18px; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE 2 — Wall Bracket Lamp  (Chapter II threshold: left edge, 0.13–0.27)
+   Wire retracts to 0, horizontal bracket extends from the left wall.
+   A small directional cone shade projects rightward.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.o-lamp--wall .o-lamp__wire { height: 0; opacity: 0; }
+
+.o-lamp--wall .o-lamp__bracket {
+  width: 44px;
+  opacity: 1;
+}
+.o-lamp--wall .o-lamp__globe {
+  width: 22px;
+  height: 26px;
+}
+.o-lamp--wall .o-lamp__socket { width: 13px; }
+
+/* Angled cone shade pointing right */
+.o-lamp--wall .o-lamp__shade {
+  top: auto;
+  bottom: -2px;
+  left: auto;
+  right: -32px;
+  transform: none;
   width: 0;
   height: 0;
-  opacity: 0;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  border-left: 28px solid rgba(20, 16, 10, 0.88);
+  opacity: 1;
+  filter: drop-shadow(2px 0 8px rgba(251,191,36,0.18));
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE 3 — Industrial Spotlight  (Chapter III kitchen reveal: centre, 0.30–0.43)
+   Long wire, geometric trapezoid shade, bulb smaller and more focused.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.o-lamp--spotlight .o-lamp__wire { height: 120px; opacity: 1; }
+
+.o-lamp--spotlight .o-lamp__shade {
+  top: -14px;
+  left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(180deg, rgba(251,191,36,0.25), transparent);
-  clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
-  pointer-events: none;
-  transition: all 1s var(--ease-out);
-}
-.lamp--on .lamp__cone {
+  width: 44px;
+  height: 22px;
+  border-radius: 0;
+  background: #1a1614;
+  clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+  border: 1px solid rgba(200,160,112,0.2);
   opacity: 1;
+  /* reset any border-trick values */
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  border-right: none;
+}
+/* Re-apply real border after reset */
+.o-lamp--spotlight .o-lamp__shade {
+  border: 1px solid rgba(200,160,112,0.2);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LAMP STATE 1 — Ceiling Bulb (default)
-   Simple hanging bulb, wire visible, cone projects downward.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.lamp--ceiling .lamp__cone {
-  width: 180px;
-  height: 260px;
+.o-lamp--spotlight .o-lamp__globe {
+  width: 20px;
+  height: 22px;
+  border-radius: 50% 50% 40% 40%;
 }
+.o-lamp--spotlight .o-lamp__socket { width: 14px; }
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LAMP STATE 2 — Wall Lamp
-   Wire hidden (height → 0). Bracket extends to the left.
-   Cone rotates to project rightward.
+   STATE 4 — Table Lamp  (Chapter IV–V services & projects: right, 0.46–0.78)
+   Wire gone. Dome shade on top. Base / stem below.
    ═══════════════════════════════════════════════════════════════════════════ */
-.lamp--wall .lamp__wire { height: 0; }
-.lamp--wall .lamp__bracket {
-  width: 48px;
+.o-lamp--table .o-lamp__wire { height: 0; opacity: 0; }
+
+.o-lamp--table .o-lamp__shade {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 26px;
+  border-radius: 50% 50% 0 0;
+  background: #1a1614;
+  border: 1px solid rgba(200,160,112,0.18);
   opacity: 1;
-}
-.lamp--wall .lamp__bulb {
-  width: 28px;
-  height: 34px;
-}
-.lamp--wall .lamp__cone {
-  width: 300px;
-  height: 400px;
-  top: 20%;
-  left: 100%;
-  transform: translateX(0) rotate(-15deg);
-  transform-origin: top left;
-  clip-path: polygon(0% 0%, 10% 0%, 100% 100%, 0% 80%);
-  background: linear-gradient(110deg, rgba(251,191,36,0.2), transparent 80%);
+  /* reset border-trick */
+  border-top: 1px solid rgba(200,160,112,0.18);
+  border-left: 1px solid rgba(200,160,112,0.18);
+  border-bottom: none;
+  border-right: 1px solid rgba(200,160,112,0.18);
+  clip-path: none;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LAMP STATE 3 — Hanging Spotlight
-   Long wire, geometric shade, narrow intense cone below.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.lamp--spotlight .lamp__wire { height: 160px; }
-.lamp--spotlight .lamp__shade {
+.o-lamp--table .o-lamp__globe {
+  width: 18px;
+  height: 20px;
+  border-radius: 50%;
+}
+.o-lamp--table .o-lamp__socket { width: 12px; }
+
+/* Thin stem + wide base */
+.o-lamp--table .o-lamp__base {
   width: 52px;
-  height: 30px;
-  opacity: 1;
-  background: #1a1816;
-  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-  position: absolute;
-  top: -10px;
-}
-.lamp--spotlight .lamp__bulb {
-  width: 24px;
-  height: 28px;
-}
-.lamp--spotlight .lamp__cone {
-  width: 220px;
-  height: 50vh;
-  clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LAMP STATE 4 — Table Lamp
-   Wire hidden. Base visible. Shade forms classic dome.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.lamp--table .lamp__wire { height: 0; }
-.lamp--table .lamp__base {
-  width: 60px;
   height: 8px;
   opacity: 1;
-}
-.lamp--table .lamp__shade {
-  width: 64px;
-  height: 36px;
-  opacity: 1;
-  background: #1e1c18;
-  border-radius: 50% 50% 0 0;
-  position: absolute;
-  top: -20px;
-  border: 1px solid rgba(251,191,36,0.1);
-}
-.lamp--table .lamp__bulb {
-  width: 20px;
-  height: 24px;
-}
-.lamp--table .lamp__cone {
-  width: 200px;
-  height: 180px;
-  background: radial-gradient(ellipse at top, rgba(251,191,36,0.22), transparent 80%);
-  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  border-radius: 2px;
 }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LAMP STATE 5 — Vintage Lantern
-   Hook visible, cage wraps the bulb, warm flickering glow.
+   STATE 5 — Vintage Lantern  (Chapter VI + Fin: lower-left, 0.81–1.00)
+   Short wire, ornate iron hook above, cage wraps the globe.
    ═══════════════════════════════════════════════════════════════════════════ */
-.lamp--lantern .lamp__wire { height: 20px; }
-.lamp--lantern .lamp__hook {
+.o-lamp--lantern .o-lamp__wire { height: 18px; opacity: 1; }
+
+.o-lamp--lantern .o-lamp__hook {
+  width: 20px;
+  height: 12px;
+  opacity: 1;
+  border-color: rgba(200, 160, 112, 0.5);
+}
+
+.o-lamp--lantern .o-lamp__cage {
+  border-color: rgba(200, 160, 112, 0.3);
+  opacity: 1;
+}
+
+.o-lamp--lantern .o-lamp__globe {
   width: 24px;
-  height: 14px;
-  opacity: 1;
-}
-.lamp--lantern .lamp__lantern-cage {
-  border-color: #3a342a;
-  opacity: 1;
-}
-.lamp--lantern .lamp__bulb {
-  width: 22px;
   height: 28px;
   border-radius: 40%;
-}
-.lamp--lantern .lamp__cone {
-  width: 260px;
-  height: 200px;
-  background: radial-gradient(ellipse at top, rgba(251,191,36,0.18), transparent 70%);
-  clip-path: ellipse(50% 70% at 50% 0%);
-}
-/* Flicker animation for the lantern */
-.lamp--lantern.lamp--on .lamp__bulb {
-  animation: lanternFlicker 3s ease-in-out infinite alternate;
-}
-@keyframes lanternFlicker {
-  0%   { box-shadow: 0 0 40px 12px rgba(251,191,36,0.55), 0 0 100px 25px rgba(251,191,36,0.25); }
-  25%  { box-shadow: 0 0 35px 10px rgba(251,191,36,0.50), 0 0 90px  22px rgba(251,191,36,0.22); }
-  50%  { box-shadow: 0 0 50px 15px rgba(251,191,36,0.60), 0 0 120px 30px rgba(251,191,36,0.30); }
-  75%  { box-shadow: 0 0 38px 11px rgba(251,191,36,0.52), 0 0 95px  23px rgba(251,191,36,0.24); }
-  100% { box-shadow: 0 0 45px 14px rgba(251,191,36,0.58), 0 0 110px 28px rgba(251,191,36,0.28); }
+  background: radial-gradient(ellipse at 38% 32%,
+    rgba(255, 232, 180, 0.22) 0%,
+    rgba(26, 22, 16, 0.9) 65%,
+    rgba(10, 8, 6, 0.98) 100%);
+  box-shadow:
+    inset 0 -3px 8px rgba(0,0,0,0.6),
+    0 0 24px 6px rgba(255, 176, 80, 0.18);
+  /* flicker */
+  animation: lanternFlicker 2.8s ease-in-out infinite alternate;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Responsive
-   ═══════════════════════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .services-grid { grid-template-columns: repeat(2, 1fr); }
-  .section__inner--split { grid-template-columns: 1fr; }
-  .door-frame { display: none; }
-  .stats { gap: 28px; flex-wrap: wrap; }
+@keyframes lanternFlicker {
+  0%   { box-shadow: inset 0 -3px 8px rgba(0,0,0,0.6), 0 0 20px 4px rgba(255,176,80,0.14); }
+  30%  { box-shadow: inset 0 -3px 8px rgba(0,0,0,0.6), 0 0 28px 8px rgba(255,176,80,0.22); }
+  60%  { box-shadow: inset 0 -3px 8px rgba(0,0,0,0.6), 0 0 18px 3px rgba(255,176,80,0.12); }
+  100% { box-shadow: inset 0 -3px 8px rgba(0,0,0,0.6), 0 0 32px 10px rgba(255,176,80,0.26); }
 }
-@media (max-width: 600px) {
-  .services-grid { grid-template-columns: 1fr; }
-  .section { padding: 8vh 6vw; }
-  .project-card { flex: 0 0 260px; }
+
+.o-lamp--lantern .o-lamp__socket { width: 14px; }
+
+
+/* ── Responsive: scale down on small screens ────────────────────────────── */
+@media (max-width: 768px) {
+  .o-lamp { transform: scale(0.78); transform-origin: top center; }
+  .o-lamp__label { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .o-lamp, .o-lamp * { transition: none !important; animation: none !important; }
 }
