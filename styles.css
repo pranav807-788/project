@@ -264,7 +264,10 @@ body {
   align-items: stretch;
   border: 3px solid #1a1614;
   border-radius: 2px;
-  overflow: hidden;
+  overflow: visible;
+  /* perspective is REQUIRED for rotateY to produce visible 3D door opening */
+  perspective: 1200px;
+  perspective-origin: center center;
 }
 .door {
   flex: 1;
@@ -272,6 +275,9 @@ body {
   border: 1px solid rgba(251, 191, 36, 0.06);
   transition: transform 800ms var(--ease-out);
   z-index: 2;
+  /* Ensure 3D transform is preserved */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 .door--left  { transform-origin: left center; }
 .door--right { transform-origin: right center; }

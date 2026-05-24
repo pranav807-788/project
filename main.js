@@ -173,12 +173,12 @@
     gsap.timeline({
       scrollTrigger: {
         trigger: "#s5",
-        start: "top 50%",
-        end: "top 10%",
+        start: "top 80%",
+        end: "center center",
         scrub: 1.5,
         onUpdate: (self) => {
-          // Reveal contact details once doors are ~40% open
-          if (self.progress > 0.4 && doorContact) {
+          // Reveal contact details once doors are ~35% open
+          if (self.progress > 0.35 && doorContact) {
             doorContact.classList.add("is-revealed");
           } else if (doorContact) {
             doorContact.classList.remove("is-revealed");
@@ -186,9 +186,9 @@
         }
       }
     })
-    .to(doorLeft,  { rotateY: -35, ease: "power2.out" }, 0)
-    .to(doorRight, { rotateY: 35,  ease: "power2.out" }, 0)
-    .to(doorLight, { opacity: 0.8, width: 60, ease: "power2.out" }, 0);
+    .to(doorLeft,  { rotationY: -55, ease: "power2.out" }, 0)
+    .to(doorRight, { rotationY: 55,  ease: "power2.out" }, 0)
+    .to(doorLight, { opacity: 0.9, width: 80, ease: "power2.out" }, 0);
   }
 
   // ── Ambient: auto-ignite the lamp if user scrolls past section 1 ───────
