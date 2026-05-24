@@ -163,7 +163,7 @@
     });
   }
 
-  // ── Section 5 door animation: doors crack open to reveal contact ─────
+  // ── Section 5 door animation: doors slide open to reveal contact ─────
   const doorLeft  = document.querySelector(".door--left");
   const doorRight = document.querySelector(".door--right");
   const doorLight = document.querySelector(".door-light");
@@ -177,8 +177,8 @@
         end: "center center",
         scrub: 1.5,
         onUpdate: (self) => {
-          // Reveal contact details once doors are ~35% open
-          if (self.progress > 0.35 && doorContact) {
+          // Reveal contact details once doors are ~30% open
+          if (self.progress > 0.3 && doorContact) {
             doorContact.classList.add("is-revealed");
           } else if (doorContact) {
             doorContact.classList.remove("is-revealed");
@@ -186,9 +186,10 @@
         }
       }
     })
-    .to(doorLeft,  { rotationY: -55, ease: "power2.out" }, 0)
-    .to(doorRight, { rotationY: 55,  ease: "power2.out" }, 0)
-    .to(doorLight, { opacity: 0.9, width: 80, ease: "power2.out" }, 0);
+    // Slide left door to the left, right door to the right
+    .to(doorLeft,  { xPercent: -100, ease: "power2.out" }, 0)
+    .to(doorRight, { xPercent: 100,  ease: "power2.out" }, 0)
+    .to(doorLight, { opacity: 0, width: 0, ease: "power2.out" }, 0);
   }
 
   // ── Ambient: auto-ignite the lamp if user scrolls past section 1 ───────

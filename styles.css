@@ -252,46 +252,42 @@ body {
 /* ── (Contact form removed — details now live inside the door frame) ──── */
 
 
-/* ── Door frame (Section 5 decoration) ──────────────────────────────────── */
+/* ── Door frame (Section 5) ──────────────────────────────────────────────── */
 .door-frame {
   position: relative;
   width: 100%;
-  max-width: 480px;
-  height: 480px;
+  max-width: 500px;
+  height: 520px;
   margin: 48px auto 0;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
   border: 3px solid #1a1614;
   border-radius: 2px;
-  overflow: visible;
-  /* perspective is REQUIRED for rotateY to produce visible 3D door opening */
-  perspective: 1200px;
-  perspective-origin: center center;
+  overflow: hidden;
+  background: #050403;
 }
 .door {
-  flex: 1;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
   background: #0c0a08;
   border: 1px solid rgba(251, 191, 36, 0.06);
-  transition: transform 800ms var(--ease-out);
   z-index: 2;
-  /* Ensure 3D transform is preserved */
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
+  transition: transform 0.1s linear;
+  /* Doors slide apart via translateX driven by GSAP */
 }
-.door--left  { transform-origin: left center; }
-.door--right { transform-origin: right center; }
+.door--left  { left: 0; }
+.door--right { right: 0; }
 .door-light {
   position: absolute;
   top: 0; bottom: 0;
   left: 50%;
-  width: 4px;
+  width: 2px;
   transform: translateX(-50%);
   background: var(--warm);
-  opacity: 0.25;
-  box-shadow: 0 0 30px 10px rgba(251, 191, 36, 0.3);
-  transition: opacity 600ms, width 600ms;
+  opacity: 0.3;
+  box-shadow: 0 0 40px 12px rgba(251, 191, 36, 0.4);
   z-index: 1;
+  transition: width 0.1s linear, opacity 0.1s linear;
 }
 
 /* ── Contact details inside the door frame ──────────────────────────────── */
