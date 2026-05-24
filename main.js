@@ -585,16 +585,20 @@ function tick() {
   camera.position.z = camZ;
   camera.lookAt(state.mouse.x * 0.15, 1.55 + state.mouse.y * 0.05, lookZ);
 
-  // ── Smart doors (mouse proximity) ──
-  // Active range in scroll: ~0.42–0.78. Outside that range they stay closed.
+  // ── Smart doors (scroll-driven, cursor-amplified) ──
+  // Wider active range: doors begin parting earlier and stay open longer so
+  // the user always sees them in motion as the camera approaches.
   const doorActive =
-    smoothstep(0.4, 0.5, s) * (1 - smoothstep(0.78, 0.86, s));
+    smoothstep(0.22, 0.42, s) * (1 - smoothstep(0.78, 0.88, s));
   // Project mouse toward door center: cursor near center (0,0) → open more.
   const mDist = Math.hypot(state.mouse.x, state.mouse.y * 0.9);
   const proximity = clamp(1 - mDist * 1.05, 0, 1);
   // Anticipation: a small flutter even before the user "commits" close.
   const anticipation = Math.pow(proximity, 1.6);
-  state.doorTarget = anticipation * doorActive;
+  // Doors open by themselves on arrival (75%); cursor proximity adds the
+  // remaining 25% — so the experience is satisfying without mouse interaction
+  // but rewards curious users who hover.
+  state.doorTarget = (0.75 + 0.25 * anticipation) * doorActive;
   // Different rates for opening vs closing — opening is curious, closing settles.
   const openingRate = state.doorTarget > state.doorOpen ? 2.2 : 1.6;
   state.doorOpen += (state.doorTarget - state.doorOpen) * damp(openingRate, dt);
