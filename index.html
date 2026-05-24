@@ -3,295 +3,140 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#0a0a0a" />
   <title>Lumière — Kitchen Atelier</title>
-  <meta name="description" content="Lumière is a kitchen atelier of bespoke modular and smart kitchens, modern interiors, and quietly considered living spaces." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
 </head>
 <body>
-  <div id="app">
-    <canvas id="scene" aria-hidden="true"></canvas>
 
-    <!-- ============================================================== -->
-    <!--  Overlay text + UI. Each chapter section fades by data-start /  -->
-    <!--  data-end driven from main.js (scroll progress 0..1).           -->
-    <!-- ============================================================== -->
-    <div class="overlay">
-
-      <!-- Chapter I — The Light -->
-      <section class="scene-text c1" data-start="0.00" data-end="0.12">
-        <span class="eyebrow">Chapter I &middot; The Light</span>
-        <h1 class="display"><span>Design</span> <span>follows</span> <span class="warm">light.</span></h1>
-        <p class="hint">Scroll slowly &middot; let the light guide you</p>
-      </section>
-
-      <!-- Chapter II — The Door -->
-      <section class="scene-text c2" data-start="0.13" data-end="0.27">
-        <span class="eyebrow">Chapter II &middot; The Threshold</span>
-        <h2 class="display">The door<br/>is <span class="warm">listening.</span></h2>
-        <p>Move your cursor toward it. Approach softly &mdash; it answers to presence, not pressure.</p>
-      </section>
-
-      <!-- Chapter III — The Kitchen Reveal -->
-      <section class="scene-text c3" data-start="0.30" data-end="0.43">
-        <span class="eyebrow">Chapter III &middot; The Reveal</span>
-        <h2 class="display">Spaces designed<br/>around <span class="warm">living.</span></h2>
-        <p>Marble that holds a memory of warmth. Wood that listens. Light placed where it wants to be.</p>
-      </section>
-
-      <!-- Chapter IV — What We Create -->
-      <section class="chapter-services" data-start="0.46" data-end="0.61" aria-label="Services">
-        <header class="chapter-head">
-          <span class="eyebrow">Chapter IV &middot; The Craft</span>
-          <h2 class="display-sm">What we <span class="warm">create.</span></h2>
-        </header>
-        <div class="services-grid">
-          <article class="service-card">
-            <span class="num">01</span>
-            <h3>Modular Kitchens</h3>
-            <p>Architectural cabinetry, calibrated to the room and the rhythm of the people in it.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">02</span>
-            <h3>Smart Kitchens</h3>
-            <p>Intuitive technology &mdash; hidden, ambient, never in the way of cooking.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">03</span>
-            <h3>Interior Design</h3>
-            <p>The kitchen as the centre of a home, dressed in materials that age beautifully.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">04</span>
-            <h3>Space Optimisation</h3>
-            <p>Volume understood as choreography. Every drawer earns its place.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">05</span>
-            <h3>Installation</h3>
-            <p>Site work performed like watch-making. Tolerances measured in tenths.</p>
-          </article>
-          <article class="service-card">
-            <span class="num">06</span>
-            <h3>Custom Design</h3>
-            <p>One-of-one rooms drawn for a single household, never rendered twice.</p>
-          </article>
-        </div>
-      </section>
-
-      <!-- Chapter V — Featured Projects -->
-      <section class="chapter-projects" data-start="0.64" data-end="0.78" aria-label="Selected work">
-        <header class="chapter-head">
-          <span class="eyebrow">Chapter V &middot; Selected Work</span>
-          <h2 class="display-sm">Three rooms.<br/><span class="warm">Three stories.</span></h2>
-        </header>
-        <!-- The rail's translateX is driven from main.js based on scroll
-             progress within this chapter, giving a horizontal parallax. -->
-        <div class="projects-rail-viewport">
-          <div class="projects-rail" id="projects-rail">
-            <article class="project project-1">
-              <div class="project-art" aria-hidden="true">
-                <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice">
-                  <defs>
-                    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0" stop-color="#1a120a"/>
-                      <stop offset="1" stop-color="#08060a"/>
-                    </linearGradient>
-                  </defs>
-                  <rect width="600" height="360" fill="url(#g1)"/>
-                  <!-- floor / ceiling perspective lines -->
-                  <g stroke="#c8a070" stroke-opacity="0.22" stroke-width="0.7" fill="none">
-                    <path d="M0,260 L600,220"/>
-                    <path d="M0,300 L600,260"/>
-                    <path d="M0,340 L600,300"/>
-                    <path d="M0,90  L600,130"/>
-                    <path d="M0,50  L600,90"/>
-                  </g>
-                  <!-- island silhouette -->
-                  <rect x="180" y="200" width="240" height="60" fill="#0c0a08"/>
-                  <rect x="180" y="195" width="240" height="6" fill="#a08465"/>
-                  <!-- pendants -->
-                  <g stroke="#c8a070" stroke-width="0.6" fill="none">
-                    <line x1="240" y1="40" x2="240" y2="140"/>
-                    <line x1="300" y1="40" x2="300" y2="140"/>
-                    <line x1="360" y1="40" x2="360" y2="140"/>
-                  </g>
-                  <g fill="#ffd28a">
-                    <circle cx="240" cy="146" r="6"/>
-                    <circle cx="300" cy="146" r="6"/>
-                    <circle cx="360" cy="146" r="6"/>
-                  </g>
-                  <!-- glow -->
-                  <radialGradient id="glow1" cx="0.5" cy="0.4" r="0.45">
-                    <stop offset="0" stop-color="#ffb070" stop-opacity="0.35"/>
-                    <stop offset="1" stop-color="#ffb070" stop-opacity="0"/>
-                  </radialGradient>
-                  <rect width="600" height="360" fill="url(#glow1)"/>
-                </svg>
-              </div>
-              <div class="project-meta">
-                <span class="num">P / 01</span>
-                <h3>Maison Albâtre</h3>
-                <p class="loc">Provence &middot; 2025 &middot; 240 m²</p>
-                <p class="desc">A luxury kitchen carved in pale Calacatta and oiled walnut. Three pendants, six metres of counter, one long lunch.</p>
-              </div>
-            </article>
-
-            <article class="project project-2">
-              <div class="project-art" aria-hidden="true">
-                <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice">
-                  <defs>
-                    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0" stop-color="#0a0a0c"/>
-                      <stop offset="1" stop-color="#16110d"/>
-                    </linearGradient>
-                  </defs>
-                  <rect width="600" height="360" fill="url(#g2)"/>
-                  <!-- modern hard-edge composition -->
-                  <rect x="60"  y="80"  width="220" height="220" fill="#0c0a08"/>
-                  <rect x="60"  y="80"  width="220" height="6"   fill="#c8a070" opacity="0.4"/>
-                  <rect x="320" y="120" width="220" height="180" fill="#0e0c0a"/>
-                  <rect x="320" y="120" width="220" height="3"   fill="#c8a070" opacity="0.6"/>
-                  <line x1="0" y1="300" x2="600" y2="300" stroke="#c8a070" stroke-opacity="0.18"/>
-                  <circle cx="170" cy="50" r="8" fill="#ffd28a"/>
-                  <circle cx="430" cy="80" r="6" fill="#ffd28a"/>
-                  <radialGradient id="glow2" cx="0.7" cy="0.2" r="0.55">
-                    <stop offset="0" stop-color="#ffb070" stop-opacity="0.3"/>
-                    <stop offset="1" stop-color="#ffb070" stop-opacity="0"/>
-                  </radialGradient>
-                  <rect width="600" height="360" fill="url(#glow2)"/>
-                </svg>
-              </div>
-              <div class="project-meta">
-                <span class="num">P / 02</span>
-                <h3>Atelier Noir</h3>
-                <p class="loc">Copenhagen &middot; 2024 &middot; 120 m²</p>
-                <p class="desc">A modern kitchen of matte basalt and brushed brass. Quiet edges. A single seam across the island, twenty millimetres wide.</p>
-              </div>
-            </article>
-
-            <article class="project project-3">
-              <div class="project-art" aria-hidden="true">
-                <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice">
-                  <defs>
-                    <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stop-color="#0d0a08"/>
-                      <stop offset="1" stop-color="#050403"/>
-                    </linearGradient>
-                  </defs>
-                  <rect width="600" height="360" fill="url(#g3)"/>
-                  <!-- compact tight composition -->
-                  <rect x="180" y="100" width="240" height="220" fill="#0a0908"/>
-                  <rect x="180" y="100" width="240" height="4" fill="#a08465"/>
-                  <rect x="180" y="160" width="240" height="2" fill="#c8a070" opacity="0.4"/>
-                  <rect x="180" y="220" width="240" height="2" fill="#c8a070" opacity="0.4"/>
-                  <line x1="295" y1="40" x2="295" y2="160" stroke="#c8a070" stroke-width="0.6"/>
-                  <line x1="305" y1="40" x2="305" y2="160" stroke="#c8a070" stroke-width="0.6"/>
-                  <ellipse cx="300" cy="166" rx="14" ry="6" fill="#ffd28a"/>
-                  <radialGradient id="glow3" cx="0.5" cy="0.5" r="0.4">
-                    <stop offset="0" stop-color="#ffb070" stop-opacity="0.32"/>
-                    <stop offset="1" stop-color="#ffb070" stop-opacity="0"/>
-                  </radialGradient>
-                  <rect width="600" height="360" fill="url(#glow3)"/>
-                </svg>
-              </div>
-              <div class="project-meta">
-                <span class="num">P / 03</span>
-                <h3>Galerie Petit</h3>
-                <p class="loc">Kyoto &middot; 2025 &middot; 38 m²</p>
-                <p class="desc">A compact kitchen for a tea-house apartment. Folded oak, a deep sink, and the patience of a small room held in great care.</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- Chapter VI — Behind The Magic -->
-      <section class="scene-text c6" data-start="0.81" data-end="0.91">
-        <span class="eyebrow">Chapter VI &middot; Behind The Magic</span>
-        <h2 class="display">Every detail<br/><span class="warm">considered.</span></h2>
-        <p>From the grain of the wood to the angle of the handle &mdash; nothing arrives by accident. Materials are chosen by hand, drawings are read aloud, and joinery is rehearsed before it is cut.</p>
-      </section>
-
-      <!-- Final ending — Contact card emerges through the open door -->
-      <section class="chapter-ending" data-start="0.94" data-end="1.00">
-        <span class="eyebrow">Fin &middot; Until we meet again</span>
-        <h2 class="display-sm">Step in,<br/>when you are <span class="warm">ready.</span></h2>
-        <div class="contact-card">
-          <div class="contact-row">
-            <span class="contact-label">Atelier</span>
-            <span class="contact-value">14 Rue de la Lumi&egrave;re &middot; Paris</span>
-          </div>
-          <div class="contact-row">
-            <span class="contact-label">Write</span>
-            <a class="contact-value" href="mailto:atelier@lumiere.studio">atelier@lumiere.studio</a>
-          </div>
-          <div class="contact-row">
-            <span class="contact-label">Call</span>
-            <a class="contact-value" href="tel:+33100000000">+33 1 00 00 00 00</a>
-          </div>
-          <div class="contact-row">
-            <span class="contact-label">Follow</span>
-            <span class="contact-value">@lumiere.atelier</span>
-          </div>
-        </div>
-        <p class="hint">the room exhales &middot; the light returns home</p>
-      </section>
-
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       THE LAMP — one persistent element that morphs through 5 states.
+       Position + shape + wire length all driven by GSAP ScrollTrigger.
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="lamp" class="lamp lamp--ceiling" aria-hidden="true">
+    <div class="lamp__wire"></div>
+    <div class="lamp__fixture">
+      <div class="lamp__shade"></div>
+      <div class="lamp__bulb">
+        <span class="lamp__filament"></span>
+      </div>
+      <div class="lamp__bracket"></div>
+      <div class="lamp__base"></div>
+      <div class="lamp__hook"></div>
+      <div class="lamp__lantern-cage"></div>
     </div>
-
-    <!-- ============================================================== -->
-    <!--  Static cinematic chrome                                         -->
-    <!-- ============================================================== -->
-    <div class="vignette" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
-
-    <header class="brand-bar" aria-hidden="false">
-      <a class="brand" href="#" aria-label="Lumi&egrave;re home">
-        <span class="brand-mark">L</span>
-        <span class="brand-name">Lumi&egrave;re</span>
-        <span class="brand-tag">Kitchen Atelier</span>
-      </a>
-      <nav class="brand-meta">
-        <span class="brand-meta-item">MMXXVI</span>
-        <span class="brand-meta-item">Paris &middot; Kyoto</span>
-      </nav>
-    </header>
-
-    <!-- Vertical chapter indicator on the right edge -->
-    <nav class="chapter-nav" aria-label="Chapters">
-      <ol id="chapter-nav-list">
-        <li data-chapter="light"><span class="dot"></span><span class="label">I &middot; Light</span></li>
-        <li data-chapter="door"><span class="dot"></span><span class="label">II &middot; Threshold</span></li>
-        <li data-chapter="reveal"><span class="dot"></span><span class="label">III &middot; Reveal</span></li>
-        <li data-chapter="services"><span class="dot"></span><span class="label">IV &middot; Craft</span></li>
-        <li data-chapter="projects"><span class="dot"></span><span class="label">V &middot; Work</span></li>
-        <li data-chapter="magic"><span class="dot"></span><span class="label">VI &middot; Magic</span></li>
-        <li data-chapter="ending"><span class="dot"></span><span class="label">Fin</span></li>
-      </ol>
-    </nav>
-
-    <div class="scroll-indicator" aria-hidden="true"><span></span></div>
-
-    <noscript>
-      <div class="noscript">This experience requires JavaScript and WebGL.</div>
-    </noscript>
+    <div class="lamp__glow"></div>
+    <div class="lamp__cone"></div>
   </div>
 
-  <script type="module" src="main.js"></script>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SECTIONS — 5 content panels, each ~100vh tall.
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- SECTION 1 — Brand / The Suspended Ceiling Bulb (top-left) -->
+  <section id="s1" class="section section--1">
+    <div class="section__inner">
+      <div class="brand-reveal" id="brand-logo">
+        <span class="brand-mark">L</span>
+        <span class="brand-name">Lumière</span>
+        <span class="brand-tag">Kitchen Atelier</span>
+      </div>
+      <h1 class="display">Design<br/>follows <em class="warm">light.</em></h1>
+      <p class="hint">Hover the bulb to ignite &middot; then scroll</p>
+    </div>
+  </section>
+
+  <!-- SECTION 2 — About / The Fixed Wall Lamp (middle-left) -->
+  <section id="s2" class="section section--2">
+    <div class="section__inner section__inner--right">
+      <span class="eyebrow">About the Atelier</span>
+      <h2 class="display-sm">Kitchens conceived<br/>as <em class="warm">living rooms.</em></h2>
+      <p class="body-text">We design bespoke modular kitchens and interiors where every surface, joint, and shadow has been considered. Founded in Paris, delivered worldwide.</p>
+      <ul class="stats">
+        <li><strong>240+</strong><span>Projects Delivered</span></li>
+        <li><strong>12</strong><span>Design Awards</span></li>
+        <li><strong>8</strong><span>Countries</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SECTION 3 — Services / The Hanging Spotlight (dead center) -->
+  <section id="s3" class="section section--3">
+    <div class="section__inner section__inner--center">
+      <span class="eyebrow">What We Create</span>
+      <h2 class="display-sm">Kitchen Cabinet<br/><em class="warm">Services</em></h2>
+      <div class="services-grid">
+        <article class="card"><span class="card__num">01</span><h3>Modular Kitchens</h3><p>Precision cabinetry calibrated to your room's geometry.</p></article>
+        <article class="card"><span class="card__num">02</span><h3>Smart Kitchens</h3><p>Hidden technology — ambient, intuitive, never in the way.</p></article>
+        <article class="card"><span class="card__num">03</span><h3>Interior Design</h3><p>Materials that age beautifully, arranged with quiet intention.</p></article>
+        <article class="card"><span class="card__num">04</span><h3>Space Optimisation</h3><p>Every drawer earns its place; volume as choreography.</p></article>
+        <article class="card"><span class="card__num">05</span><h3>Installation</h3><p>Site work performed like watchmaking. Tolerances in tenths.</p></article>
+        <article class="card"><span class="card__num">06</span><h3>Custom Design</h3><p>One-of-one rooms drawn for a single household.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4 — Portfolio / The Table Lamp (middle-right) -->
+  <section id="s4" class="section section--4">
+    <div class="section__inner">
+      <span class="eyebrow">Selected Work</span>
+      <h2 class="display-sm">A Tab in <em class="warm">Tube</em></h2>
+      <div class="portfolio-track" id="portfolio-track">
+        <div class="portfolio-track__rail">
+          <article class="project-card">
+            <div class="project-card__img project-card__img--1"></div>
+            <h3>Maison Albâtre</h3>
+            <p>Provence &middot; 240 m²</p>
+          </article>
+          <article class="project-card">
+            <div class="project-card__img project-card__img--2"></div>
+            <h3>Atelier Noir</h3>
+            <p>Copenhagen &middot; 120 m²</p>
+          </article>
+          <article class="project-card">
+            <div class="project-card__img project-card__img--3"></div>
+            <h3>Galerie Petit</h3>
+            <p>Kyoto &middot; 38 m²</p>
+          </article>
+          <article class="project-card">
+            <div class="project-card__img project-card__img--4"></div>
+            <h3>Villa Lumière</h3>
+            <p>Lisbon &middot; 180 m²</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5 — Contact / The Vintage Lantern (lower-left) -->
+  <section id="s5" class="section section--5">
+    <div class="section__inner section__inner--split">
+      <div class="contact-form">
+        <span class="eyebrow">Get in Touch</span>
+        <h2 class="display-sm">Step inside,<br/>when you are <em class="warm">ready.</em></h2>
+        <form autocomplete="off" onsubmit="return false;">
+          <input type="text" placeholder="Your Name" aria-label="Name" />
+          <input type="email" placeholder="Email Address" aria-label="Email" />
+          <textarea placeholder="Tell us about your dream kitchen..." rows="4" aria-label="Message"></textarea>
+          <button type="submit">Send Inquiry</button>
+        </form>
+      </div>
+      <div class="door-frame" aria-hidden="true">
+        <div class="door door--left"></div>
+        <div class="door door--right"></div>
+        <div class="door-light"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SCRIPTS — GSAP + ScrollTrigger via CDN, then our main.js
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
