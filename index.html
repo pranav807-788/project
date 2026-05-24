@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <title>Lumière — A Cinematic Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <div class="overlay" aria-live="polite">
+      <section class="scene-text" data-start="0.00" data-end="0.18">
+        <span class="eyebrow">Lumière</span>
+        <h1>A room lit only<br/>by what guides you.</h1>
+        <p class="hint">scroll slowly &middot; let the light lead</p>
+      </section>
+
+      <section class="scene-text" data-start="0.22" data-end="0.42">
+        <span class="eyebrow">Chapter I &mdash; Presence</span>
+        <h2>Where motion has weight.</h2>
+        <p>Every object pulls. Every gesture lingers a moment longer than you expect.</p>
+      </section>
+
+      <section class="scene-text" data-start="0.46" data-end="0.66">
+        <span class="eyebrow">Chapter II &mdash; Threshold</span>
+        <h2>The door is listening.</h2>
+        <p>Move your cursor toward it. Approach softly &mdash; it answers to presence, not pressure.</p>
+      </section>
+
+      <section class="scene-text final" data-start="0.86" data-end="1.00">
+        <span class="eyebrow">Fin</span>
+        <h2>Until next time.</h2>
+        <p class="hint">the room exhales &middot; the light returns home</p>
+      </section>
+    </div>
+
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="chrome" aria-hidden="true">
+      <div class="brand">L &middot; Lumi&egrave;re</div>
+      <div class="meta">MMXXVI &middot; A film for the cursor</div>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true">
+      <span></span>
+    </div>
+
+    <noscript>
+      <div class="noscript">This experience requires JavaScript and WebGL.</div>
+    </noscript>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
