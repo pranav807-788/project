@@ -670,17 +670,16 @@ a.contact-value:hover { color: var(--warm-1); }
 /* ── Base shell ─────────────────────────────────────────────────────────── */
 .o-lamp {
   position: fixed;
-  z-index: 12;          /* above vignette (5) and grain (6), below nothing */
+  z-index: 12;          /* above vignette (5) and grain (6) */
   pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* default position: top-left, matching Ch I camera view */
+  /* Screen blend: the whole fixture composites as additive light on the canvas */
+  mix-blend-mode: screen;
   top: 6vh;
   left: 12vw;
   will-change: top, left, transform;
-  /* all position/size transitions happen through JS-driven CSS vars
-     so we only need a gentle fallback for the shape morphs */
   transition: top 1.4s cubic-bezier(.65,.05,.36,1),
               left 1.4s cubic-bezier(.65,.05,.36,1);
 }
@@ -713,17 +712,22 @@ a.contact-value:hover { color: var(--warm-1); }
   width: 32px;
   height: 38px;
   border-radius: 50% 50% 44% 44%;
-  background: radial-gradient(ellipse at 38% 32%,
-    rgba(255, 240, 200, 0.92) 0%,
-    rgba(255, 210, 130, 0.78) 30%,
-    rgba(255, 176, 80, 0.45) 60%,
-    rgba(18, 14, 8, 0.15) 100%);
-  border: 1px solid rgba(255, 200, 110, 0.5);
+  /* mix-blend-mode: screen makes this layer ADD light to whatever is behind it,
+     so it appears as a real glow instead of a solid shape on a dark canvas. */
+  mix-blend-mode: screen;
+  background: radial-gradient(ellipse at 40% 35%,
+    #ffffff       0%,
+    #fff8e0      12%,
+    #ffd080      35%,
+    #ff9030      62%,
+    #7a3500      82%,
+    #000000     100%);
+  border: none;
   box-shadow:
-    0 0 22px 7px  rgba(255, 176, 80, 0.7),
-    0 0 55px 16px rgba(255, 176, 80, 0.35),
-    0 0 110px 30px rgba(255, 176, 80, 0.15),
-    inset 0 0 8px  rgba(255, 240, 180, 0.5);
+    0 0 24px 10px  rgba(255, 180, 60, 0.95),
+    0 0 60px 22px  rgba(255, 140, 20, 0.65),
+    0 0 120px 40px rgba(255, 120, 10, 0.30),
+    0 0 220px 70px rgba(255, 100, 0,  0.12);
   transition: width 900ms cubic-bezier(.65,.05,.36,1),
               height 900ms cubic-bezier(.65,.05,.36,1),
               border-radius 900ms cubic-bezier(.65,.05,.36,1),
@@ -878,22 +882,25 @@ a.contact-value:hover { color: var(--warm-1); }
   opacity: 1;
 }
 
-/* Globe — lit up warm, matching the ceiling bulb glow */
+/* Globe — screen blend so it glows like a real light source */
 .o-lamp--wall .o-lamp__globe {
   width: 22px;
   height: 26px;
-  background: radial-gradient(ellipse at 38% 32%,
-    rgba(255, 240, 200, 0.95) 0%,
-    rgba(255, 210, 120, 0.85) 35%,
-    rgba(255, 176, 80, 0.55) 65%,
-    rgba(26, 18, 10, 0.2) 100%);
+  mix-blend-mode: screen;
+  background: radial-gradient(ellipse at 40% 35%,
+    #ffffff      0%,
+    #fff8e0     12%,
+    #ffd080     35%,
+    #ff9030     62%,
+    #7a3500     82%,
+    #000000    100%);
   box-shadow:
-    0 0 18px 6px  rgba(255, 176, 80, 0.75),
-    0 0 40px 12px rgba(255, 176, 80, 0.45),
-    0 0 80px 20px rgba(255, 176, 80, 0.20),
-    inset 0 0 6px  rgba(255, 240, 180, 0.6);
-  border: 1px solid rgba(255, 200, 100, 0.55);
-  filter: brightness(1.25);
+    0 0 20px 8px  rgba(255, 180, 60, 0.95),
+    0 0 50px 18px rgba(255, 140, 20, 0.60),
+    0 0 100px 35px rgba(255, 120, 10, 0.28),
+    0 0 180px 55px rgba(255, 100, 0,  0.10);
+  border: none;
+  filter: none;
 }
 
 /* Filament — clearly visible when lit */
@@ -1047,4 +1054,219 @@ a.contact-value:hover { color: var(--warm-1); }
 }
 @media (prefers-reduced-motion: reduce) {
   .o-lamp, .o-lamp * { transition: none !important; animation: none !important; }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Contact Editor — floating panel for updating contact details live
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Edit-contact trigger button (bottom-right corner) */
+.edit-contact-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 32px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(16, 12, 8, 0.82);
+  border: 1px solid rgba(200, 160, 112, 0.28);
+  border-radius: 3px;
+  color: rgba(200, 160, 112, 0.85);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 300ms ease, color 300ms ease,
+              box-shadow 300ms ease, background 300ms ease;
+}
+.edit-contact-btn:hover {
+  border-color: rgba(255, 176, 80, 0.65);
+  color: #ffd080;
+  background: rgba(24, 18, 10, 0.92);
+  box-shadow: 0 0 20px rgba(255, 176, 80, 0.18);
+}
+.edit-contact-btn svg {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* Editor panel */
+.contact-editor {
+  position: fixed;
+  bottom: 72px;
+  right: 32px;
+  z-index: 51;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  background: rgba(10, 8, 6, 0.96);
+  border: 1px solid rgba(200, 160, 112, 0.22);
+  border-radius: 4px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255, 176, 80, 0.04),
+    0 0 60px rgba(255, 140, 20, 0.06);
+  /* Entrance animation */
+  transform-origin: bottom right;
+  animation: editorIn 280ms cubic-bezier(.20,.80,.20,1) forwards;
+}
+.contact-editor[hidden] {
+  display: none;
+}
+@keyframes editorIn {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.contact-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(200, 160, 112, 0.10);
+}
+.contact-editor__title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.03em;
+  color: rgba(244, 231, 208, 0.9);
+}
+.contact-editor__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(200, 160, 112, 0.55);
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 2px;
+  transition: color 200ms, background 200ms;
+}
+.contact-editor__close:hover {
+  color: #ffd080;
+  background: rgba(255, 176, 80, 0.08);
+}
+
+.contact-editor__body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.contact-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.contact-editor__label {
+  font-family: "Inter", sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(200, 160, 112, 0.65);
+}
+.contact-editor__field input {
+  background: rgba(20, 16, 10, 0.7);
+  border: 1px solid rgba(200, 160, 112, 0.14);
+  border-radius: 2px;
+  padding: 9px 12px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(244, 231, 208, 0.9);
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.contact-editor__field input:focus {
+  border-color: rgba(255, 176, 80, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 176, 80, 0.08);
+}
+.contact-editor__field input::placeholder {
+  color: rgba(138, 126, 108, 0.5);
+}
+
+.contact-editor__footer {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid rgba(200, 160, 112, 0.10);
+}
+.contact-editor__save {
+  flex: 1;
+  padding: 10px 0;
+  background: linear-gradient(135deg, rgba(255, 176, 80, 0.15), rgba(255, 140, 20, 0.10));
+  border: 1px solid rgba(255, 176, 80, 0.40);
+  border-radius: 2px;
+  color: #ffd080;
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 250ms, box-shadow 250ms, border-color 250ms;
+}
+.contact-editor__save:hover {
+  background: linear-gradient(135deg, rgba(255, 176, 80, 0.28), rgba(255, 140, 20, 0.20));
+  border-color: rgba(255, 176, 80, 0.70);
+  box-shadow: 0 0 18px rgba(255, 176, 80, 0.22);
+}
+.contact-editor__reset {
+  padding: 10px 14px;
+  background: none;
+  border: 1px solid rgba(200, 160, 112, 0.14);
+  border-radius: 2px;
+  color: rgba(138, 126, 108, 0.7);
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
+}
+.contact-editor__reset:hover {
+  color: rgba(200, 160, 112, 0.9);
+  border-color: rgba(200, 160, 112, 0.35);
+}
+
+/* Toast confirmation */
+.contact-toast {
+  position: fixed;
+  bottom: 120px;
+  right: 32px;
+  z-index: 52;
+  padding: 10px 18px;
+  background: rgba(16, 12, 8, 0.94);
+  border: 1px solid rgba(255, 176, 80, 0.35);
+  border-radius: 3px;
+  color: #ffd080;
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: toastIn 2.8s cubic-bezier(.20,.80,.20,1) forwards;
+}
+@keyframes toastIn {
+  0%   { opacity: 0; transform: translateY(6px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 720px) {
+  .edit-contact-btn { bottom: 16px; right: 16px; }
+  .contact-editor { right: 16px; bottom: 60px; width: calc(100vw - 32px); }
 }

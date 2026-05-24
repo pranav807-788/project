@@ -1024,3 +1024,134 @@ state.bulb.vZ = -0.05;
   // at the end of each frame — see the patch below.
   requestAnimationFrame(pollScroll);
 })();
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Contact Editor — lets the user update contact details live.
+//  Values are persisted to localStorage so they survive page refresh.
+//  The DOM nodes that display the values carry `data-contact="fieldName"`
+//  so this module is fully decoupled from everything else.
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function initContactEditor() {
+
+  // ── Default values ──────────────────────────────────────────────────────
+  const DEFAULTS = {
+    company: "Lumière Kitchen Atelier",
+    address: "14 Rue de la Lumière · Paris",
+    email:   "atelier@lumiere.studio",
+    phone:   "+33 1 00 00 00 00",
+    social:  "@lumiere.atelier",
+  };
+
+  const STORAGE_KEY = "lumiere_contact";
+
+  // ── Load saved values (or fall back to defaults) ─────────────────────────
+  function load() {
+    try {
+      return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
+    } catch { return Object.assign({}, DEFAULTS); }
+  }
+
+  function save(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* incognito */ }
+  }
+
+  // ── Apply values to the contact-card DOM nodes ────────────────────────────
+  function applyToDOM(data) {
+    document.querySelectorAll("[data-contact]").forEach(el => {
+      const key = el.dataset.contact;
+      if (!(key in data)) return;
+      const val = data[key];
+      el.textContent = val;
+      // Update href for email / phone anchors
+      if (el.tagName === "A") {
+        if (key === "email") el.href = "mailto:" + val;
+        if (key === "phone") el.href = "tel:" + val.replace(/\s/g, "");
+      }
+    });
+  }
+
+  // ── Wire up the editor panel ──────────────────────────────────────────────
+  const openBtn   = document.getElementById("edit-contact-btn");
+  const panel     = document.getElementById("contact-editor");
+  const closeBtn  = document.getElementById("close-editor-btn");
+  const saveBtn   = document.getElementById("save-contact-btn");
+  const resetBtn  = document.getElementById("reset-contact-btn");
+
+  if (!openBtn || !panel) return;   // safety — don't crash if HTML not ready
+
+  // Populate inputs from current (saved) data
+  function populateInputs(data) {
+    panel.querySelectorAll("input[data-field]").forEach(input => {
+      const key = input.dataset.field;
+      if (key in data) input.value = data[key];
+    });
+  }
+
+  // Read inputs → return data object
+  function readInputs() {
+    const out = {};
+    panel.querySelectorAll("input[data-field]").forEach(input => {
+      const val = input.value.trim();
+      if (val) out[input.dataset.field] = val;
+    });
+    return out;
+  }
+
+  function openPanel() {
+    const data = load();
+    populateInputs(data);
+    panel.hidden = false;
+    panel.removeAttribute("hidden");
+    // Focus first input
+    const first = panel.querySelector("input");
+    if (first) setTimeout(() => first.focus(), 60);
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    panel.setAttribute("hidden", "");
+  }
+
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "contact-toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2900);
+  }
+
+  openBtn.addEventListener("click", () => {
+    if (panel.hidden || panel.getAttribute("hidden") !== null) openPanel();
+    else closePanel();
+  });
+
+  closeBtn.addEventListener("click", closePanel);
+
+  saveBtn.addEventListener("click", () => {
+    const inputs = readInputs();
+    const merged = Object.assign({}, load(), inputs);
+    save(merged);
+    applyToDOM(merged);
+    closePanel();
+    showToast("Contact details saved ✓");
+  });
+
+  resetBtn.addEventListener("click", () => {
+    save(DEFAULTS);
+    populateInputs(DEFAULTS);
+    applyToDOM(DEFAULTS);
+    showToast("Reset to defaults");
+  });
+
+  // Close on Escape
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !panel.hidden) closePanel();
+  });
+
+  // ── Apply on load ─────────────────────────────────────────────────────────
+  applyToDOM(load());
+
+})();

@@ -268,19 +268,23 @@
         <div class="contact-card">
           <div class="contact-row">
             <span class="contact-label">Atelier</span>
-            <span class="contact-value">14 Rue de la Lumi&egrave;re &middot; Paris</span>
+            <span class="contact-value" data-contact="company">Lumière Kitchen Atelier</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">Address</span>
+            <span class="contact-value" data-contact="address">14 Rue de la Lumière · Paris</span>
           </div>
           <div class="contact-row">
             <span class="contact-label">Write</span>
-            <a class="contact-value" href="mailto:atelier@lumiere.studio">atelier@lumiere.studio</a>
+            <a class="contact-value" data-contact="email" href="mailto:atelier@lumiere.studio">atelier@lumiere.studio</a>
           </div>
           <div class="contact-row">
             <span class="contact-label">Call</span>
-            <a class="contact-value" href="tel:+33100000000">+33 1 00 00 00 00</a>
+            <a class="contact-value" data-contact="phone" href="tel:+33100000000">+33 1 00 00 00 00</a>
           </div>
           <div class="contact-row">
             <span class="contact-label">Follow</span>
-            <span class="contact-value">@lumiere.atelier</span>
+            <span class="contact-value" data-contact="social">@lumiere.atelier</span>
           </div>
         </div>
         <p class="hint">the room exhales &middot; the light returns home</p>
@@ -320,6 +324,49 @@
     </nav>
 
     <div class="scroll-indicator" aria-hidden="true"><span></span></div>
+
+    <!-- ============================================================== -->
+    <!--  Contact Editor — floating panel to update details live         -->
+    <!-- ============================================================== -->
+    <button id="edit-contact-btn" class="edit-contact-btn" aria-label="Edit contact details">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span>Edit Contact</span>
+    </button>
+
+    <div id="contact-editor" class="contact-editor" role="dialog" aria-modal="true" aria-label="Edit contact details" hidden>
+      <div class="contact-editor__header">
+        <h3 class="contact-editor__title">Contact Details</h3>
+        <button class="contact-editor__close" id="close-editor-btn" aria-label="Close editor">✕</button>
+      </div>
+      <div class="contact-editor__body">
+        <label class="contact-editor__field">
+          <span class="contact-editor__label">Company / Atelier Name</span>
+          <input type="text" data-field="company" placeholder="Lumière Kitchen Atelier" />
+        </label>
+        <label class="contact-editor__field">
+          <span class="contact-editor__label">Address</span>
+          <input type="text" data-field="address" placeholder="14 Rue de la Lumière · Paris" />
+        </label>
+        <label class="contact-editor__field">
+          <span class="contact-editor__label">Email</span>
+          <input type="email" data-field="email" placeholder="atelier@lumiere.studio" />
+        </label>
+        <label class="contact-editor__field">
+          <span class="contact-editor__label">Phone</span>
+          <input type="tel" data-field="phone" placeholder="+33 1 00 00 00 00" />
+        </label>
+        <label class="contact-editor__field">
+          <span class="contact-editor__label">Social Handle</span>
+          <input type="text" data-field="social" placeholder="@lumiere.atelier" />
+        </label>
+      </div>
+      <div class="contact-editor__footer">
+        <button class="contact-editor__save" id="save-contact-btn">Save &amp; Apply</button>
+        <button class="contact-editor__reset" id="reset-contact-btn">Reset Defaults</button>
+      </div>
+    </div>
 
     <noscript>
       <div class="noscript">This experience requires JavaScript and WebGL.</div>
